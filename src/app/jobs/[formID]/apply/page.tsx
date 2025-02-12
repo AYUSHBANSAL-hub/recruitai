@@ -1,157 +1,176 @@
+"use client";
 
-// src/app/jobs/[formId]/apply/page.tsx
-'use client';
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import ResumeUpload from '@/components/ResumeUpload';
-
-interface FormField {
-  id: string;
-  type: string;
-  label: string;
-  required: boolean;
-  options?: string[];
-}
-
-interface JobForm {
+interface Form {
   id: string;
   title: string;
   jobDescription: string;
-  fields: FormField[];
+  fields: {
+    id: string;
+    type: string;
+    label: string;
+    required: boolean;
+    options?: string[];
+  }[];
 }
 
-export default function ApplicationPage({ params }: { params: { formId: string } }) {
+export default function ApplyForm() {
   const router = useRouter();
-  const [form, setForm] = useState<JobForm | null>(null);
-  const [responses, setResponses] = useState<Record<string, any>>({});
-  const [resumeUrl, setResumeUrl] = useState<string>('');
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { formId } = useParams();
+
+  const [form, setForm] = useState<Form | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [responses, setResponses] = useState<{ [key: string]: string }>({});
+  const [resume, setResume] = useState<File | null>(null);
 
   useEffect(() => {
+    console.log(formId);
+    if (!formId) return; // Don't fetch if formId is missing
+
     const fetchForm = async () => {
       try {
-        const res = await fetch(`/api/forms/${params.formId}`);
-        if (!res.ok) throw new Error('Failed to fetch form');
+        console.log("Fetching form with ID:", formId);
+        const res = await fetch(`/api/forms/${formId}`);
+        if (!res.ok) throw new Error("Failed to fetch form");
+
         const data = await res.json();
         setForm(data);
-      } catch (err) {
-        setError('Failed to load application form');
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchForm();
-  }, [params.formId]);
+  }, [formId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!resumeUrl) {
-      setError('Please upload your resume');
-      return;
-    }
+  const handleChange = (fieldId: string, value: string) => {
+    setResponses({ ...responses, [fieldId]: value });
+  };
 
-    try {
-      setSubmitting(true);
-      setError(null);
-
-      const res = await fetch('/api/applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          formId: params.formId,
-          responses,
-          resumeUrl,
-        }),
-      });
-
-      if (!res.ok) throw new Error('Failed to submit application');
-
-      router.push('/applications/success');
-    } catch (err) {
-      setError('Failed to submit application. Please try again.');
-    } finally {
-      setSubmitting(false);
+  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setResume(e.target.files[0]);
     }
   };
 
-  if (!form) return <div>Loading...</div>;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      let resumeUrl = "";
+      if (resume) {
+        const formData = new FormData();
+        formData.append("file", resume);
+
+        const uploadRes = await fetch("/api/upload-url", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadRes.ok) throw new Error("Failed to upload resume");
+
+        const uploadData = await uploadRes.json();
+        resumeUrl = uploadData.url;
+        console.log(resumeUrl);
+      }
+
+      const applicationData = {
+        formId,
+        responses,
+        resumeUrl,
+      };
+
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(applicationData),
+      });
+
+      if (!res.ok) throw new Error("Failed to submit application");
+
+      alert("Application submitted successfully!");
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2">{form.title}</h1>
-        <div className="bg-gray-50 p-4 rounded mb-8">
-          <h2 className="font-semibold mb-2">Job Description</h2>
-          <p className="whitespace-pre-wrap">{form.jobDescription}</p>
-        </div>
+    <div className="container mx-auto px-4 py-8 text-black">
+      {loading ? (
+        <p className="text-gray-600">Loading...</p>
+      ) : error ? (
+        <p className="text-red-600">{error}</p>
+      ) : form ? (
+        <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+          <h1 className="text-3xl font-bold mb-4">{form.title}</h1>
+          <p className="text-gray-700 mb-6">{form.jobDescription}</p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {form.fields.map((field) => (
-            <div key={field.id}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {field.label}
-                {field.required && <span className="text-red-500">*</span>}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {form.fields.map((field) => (
+              <div key={field.id}>
+                <label className="block text-sm font-medium text-gray-700">
+                  {field.label}
+                </label>
+                {field.type === "text" || field.type === "email" ? (
+                  <input
+                    type={field.type}
+                    required={field.required}
+                    className="mt-1 p-2 block w-full rounded-md border-gray-300"
+                    onChange={(e) => handleChange(field.id, e.target.value)}
+                  />
+                ) : field.type === "textarea" ? (
+                  <textarea
+                    required={field.required}
+                    className="mt-1 block w-full rounded-md border-gray-300"
+                    rows={3}
+                    onChange={(e) => handleChange(field.id, e.target.value)}
+                  />
+                ) : field.type === "select" && field.options ? (
+                  <select
+                    required={field.required}
+                    className="mt-1 block w-full rounded-md border-gray-300"
+                    onChange={(e) => handleChange(field.id, e.target.value)}
+                  >
+                    {field.options.map((option, index) => (
+                      <option key={index} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                ) : null}
+              </div>
+            ))}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Upload Resume
               </label>
-              {field.type === 'textarea' ? (
-                <textarea
-                  required={field.required}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  rows={3}
-                  onChange={(e) => setResponses({ ...responses, [field.id]: e.target.value })}
-                />
-              ) : field.type === 'select' ? (
-                <select
-                  required={field.required}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  onChange={(e) => setResponses({ ...responses, [field.id]: e.target.value })}
-                >
-                  <option value="">Select an option</option>
-                  {field.options?.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={field.type}
-                  required={field.required}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  onChange={(e) => setResponses({ ...responses, [field.id]: e.target.value })}
-                />
-              )}
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={handleResumeUpload}
+                className="mt-1"
+              />
             </div>
-          ))}
 
-          <div className="border-t pt-6">
-            <h2 className="text-lg font-semibold mb-4">Upload Resume</h2>
-            <ResumeUpload onUploadComplete={setResumeUrl} />
-          </div>
-
-          {error && (
-            <div className="bg-red-50 text-red-500 p-4 rounded">
-              {error}
-            </div>
-          )}
-
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="px-4 py-2 border rounded-md hover:bg-gray-50"
-            >
-              Cancel
-            </button>
             <button
               type="submit"
-              disabled={submitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="w-full py-2 px-4 bg-blue-600 text-white rounded-md"
             >
-              {submitting ? 'Submitting...' : 'Submit Application'}
+              Submit Application
             </button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      ) : (
+        <p className="text-gray-600">Form not found.</p>
+      )}
     </div>
   );
 }

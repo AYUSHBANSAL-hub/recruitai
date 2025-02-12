@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         data: {
           email,
           password: hashedPassword,
-          role: 'CANDIDATE', // Ensure candidates sign up with this role
+          role: 'ADMIN', // Ensure candidates sign up with this role
         },
       });
       

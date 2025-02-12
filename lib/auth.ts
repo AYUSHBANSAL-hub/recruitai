@@ -1,21 +1,26 @@
-// src/lib/auth.ts
-import { jwtVerify } from 'jose'
-import { cookies } from 'next/headers'
+import { jwtVerify } from 'jose';
+import { cookies } from 'next/headers';
 
 export async function getSession() {
-  const cookieStore = cookies()
-  const token = cookieStore.get('auth-token')
-
-  if (!token) return null
-
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth-token');
+
+    if (!token) {
+      console.error('Session Error: No auth-token found');
+      return null;
+    }
+
     const { payload } = await jwtVerify(
       token.value,
       new TextEncoder().encode(process.env.JWT_SECRET!)
-    )
+    );
 
-    return payload
+    console.log('Session Retrieved:', payload);
+    return payload;
   } catch (error) {
-    return null
+    console.error('Session Error:', error);
+    return null;
   }
 }
+
