@@ -1,0 +1,62 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String    // Hashed password
+  role          UserRole  @default(CANDIDATE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  forms         JobForm[] // Only for admin users
+  applications  Application[]
+}
+
+enum UserRole {
+  ADMIN
+  CANDIDATE
+}
+
+model JobForm {
+  id              String        @id @default(cuid())
+  title           String
+  jobDescription  String       @db.Text
+  fields          Json         // Stores FormField array
+  createdBy       User         @relation(fields: [userId], references: [id])
+  userId          String
+  applications    Application[]
+  active          Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Application {
+  id              String    @id @default(cuid())
+  form            JobForm   @relation(fields: [formId], references: [id])
+  formId          String
+  candidate       User      @relation(fields: [userId], references: [id])
+  userId          String
+  responses       Json      // Stores form responses
+  resumeUrl       String
+  parsedResume    Json?     // Stores parsed resume data
+  matchScore      Float?
+  matchReasoning  String?   @db.Text
+  status          ApplicationStatus @default(PENDING)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  SHORTLISTED
+  REJECTED
+}
