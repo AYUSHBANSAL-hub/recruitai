@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Form {
   id: string;
@@ -24,18 +24,26 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("Fetching forms and applications...");
+  
         const [formsRes, applicationsRes] = await Promise.all([
-          fetch('/api/forms'),
-          fetch('/api/applications'),
+          fetch('/api/forms'), // ✅ Fetch all forms
+          fetch('/api/applications'), // ✅ Fetch all applications
         ]);
-
+  
+        console.log("Forms Response Status:", formsRes.status);
+        console.log("Applications Response Status:", applicationsRes.status);
+  
         if (!formsRes.ok || !applicationsRes.ok) {
           throw new Error('Failed to fetch data');
         }
-
+  
         const formsData = await formsRes.json();
         const applicationsData = await applicationsRes.json();
-
+  
+        console.log("Forms Data:", formsData);
+        console.log("Applications Data:", applicationsData);
+  
         setForms(formsData);
         setApplications(applicationsData);
       } catch (error) {
@@ -44,20 +52,23 @@ export default function AdminDashboard() {
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, []);
+  
 
   const activeForms = forms.filter((form) => form.active).length;
   const totalApplications = applications.length;
-  const pendingReviews = applications.filter((app) => app.status === 'PENDING').length;
+  const pendingReviews = applications.filter(
+    (app) => app.status === "PENDING"
+  ).length;
 
   return (
     <div className="container text-black mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <button
-          onClick={() => router.push('/admin/forms/create')}
+          onClick={() => router.push("/admin/forms/create")}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
           Create New Form
@@ -67,15 +78,21 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-semibold mb-2">Active Forms</h3>
-          <p className="text-3xl font-bold text-blue-600">{loading ? '...' : activeForms}</p>
+          <p className="text-3xl font-bold text-blue-600">
+            {loading ? "..." : activeForms}
+          </p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-semibold mb-2">Total Applications</h3>
-          <p className="text-3xl font-bold text-green-600">{loading ? '...' : totalApplications}</p>
+          <p className="text-3xl font-bold text-green-600">
+            {loading ? "..." : totalApplications}
+          </p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-semibold mb-2">Pending Review</h3>
-          <p className="text-3xl font-bold text-yellow-600">{loading ? '...' : pendingReviews}</p>
+          <p className="text-3xl font-bold text-yellow-600">
+            {loading ? "..." : pendingReviews}
+          </p>
         </div>
       </div>
 
@@ -91,7 +108,9 @@ export default function AdminDashboard() {
               <thead>
                 <tr>
                   <th className="px-4 py-2 text-left text-gray-600">Title</th>
-                  <th className="px-4 py-2 text-left text-gray-600">Created At</th>
+                  <th className="px-4 py-2 text-left text-gray-600">
+                    Created At
+                  </th>
                   <th className="px-4 py-2 text-left text-gray-600">Status</th>
                 </tr>
               </thead>
@@ -99,8 +118,12 @@ export default function AdminDashboard() {
                 {forms.map((form) => (
                   <tr key={form.id} className="border-t">
                     <td className="px-4 py-2">{form.title}</td>
-                    <td className="px-4 py-2">{new Date(form.createdAt).toLocaleDateString()}</td>
-                    <td className="px-4 py-2">{form.active ? 'Active' : 'Inactive'}</td>
+                    <td className="px-4 py-2">
+                      {new Date(form.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-2">
+                      {form.active ? "Active" : "Inactive"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -10,14 +10,20 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const formId = searchParams.get('formId');
 
-    if (!formId) {
-      return NextResponse.json({ error: 'Missing formId' }, { status: 400 });
-    }
+    let applications;
 
-    const applications = await prisma.application.findMany({
-      where: { formId },
-      orderBy: { createdAt: 'desc' },
-    });
+    if (formId) {
+      // ✅ Fetch applications for a specific form
+      applications = await prisma.application.findMany({
+        where: { formId },
+        orderBy: { createdAt: 'desc' },
+      });
+    } else {
+      // ✅ Fetch all applications if no formId is provided
+      applications = await prisma.application.findMany({
+        orderBy: { createdAt: 'desc' },
+      });
+    }
 
     return NextResponse.json(applications, { status: 200 });
   } catch (error) {
