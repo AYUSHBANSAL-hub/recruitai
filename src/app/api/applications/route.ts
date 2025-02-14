@@ -1,59 +1,98 @@
 // /api/applications/route.ts
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import { analyzeResumeWithGPT } from "../../../../lib/gpt"; // ✅ Import GPT-3 function
+import pdfParse from "pdf-parse";
 
 const prisma = new PrismaClient();
 
-// ✅ GET Handler: Fetch applications for a specific form
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const formId = searchParams.get('formId');
-
-    let applications;
-
-    if (formId) {
-      // ✅ Fetch applications for a specific form
-      applications = await prisma.application.findMany({
-        where: { formId },
-        orderBy: { createdAt: 'desc' },
-      });
-    } else {
-      // ✅ Fetch all applications if no formId is provided
-      applications = await prisma.application.findMany({
-        orderBy: { createdAt: 'desc' },
-      });
-    }
-
-    return NextResponse.json(applications, { status: 200 });
-  } catch (error) {
-    console.error('Error fetching applications:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
-
-// ✅ POST Handler: Submit a new application
 export async function POST(request: Request) {
   try {
-    const { formId, responses, resumeUrl } = await request.json();
+    const body = await request.json();
+    console.log("📥 Incoming request body:", body);
+
+    const { formId, responses, resumeUrl } = body;
 
     if (!formId || !responses || !resumeUrl) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      console.error("❌ Missing required fields in request");
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    console.log("📢 Creating new application for formId:", formId);
+
+    const form = await prisma.jobForm.findUnique({
+      where: { id: formId },
+      select: { jobDescription: true },
+    });
+
+    if (!form) {
+      console.error("❌ Job form not found for formId:", formId);
+      return NextResponse.json({ error: "Job form not found" }, { status: 404 });
     }
 
     const newApplication = await prisma.application.create({
       data: {
         formId,
-        userId: null, // Replace with actual user authentication if needed
+        userId: null, // Handle authentication properly in production
         responses,
         resumeUrl,
-        status: 'PENDING',
+        parsedResume: null,
+        matchScore: null,
+        matchReasoning: null,
+        status: "PENDING",
       },
     });
 
+    console.log("✅ Application Created:", newApplication);
+
     return NextResponse.json(newApplication, { status: 201 });
   } catch (error) {
-    console.error('Error submitting application:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("❌ Error submitting application:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+
+
+// ✅ GET Handler: Fetch applications for a specific form
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const formId = searchParams.get("formId");
+
+    console.log(
+      "📢 Received GET request for applications with formId:",
+      formId
+    );
+
+    if (!formId) {
+      console.error("❌ Missing formId in request");
+      return NextResponse.json({ error: "Missing formId" }, { status: 400 });
+    }
+
+    // ✅ Log all applications to debug
+    const allApplications = await prisma.application.findMany();
+    console.log("📊 Total Applications in DB:", allApplications.length);
+
+    // Fetch applications from DB
+    const applications = await prisma.application.findMany({
+      where: { formId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    console.log("✅ Applications Found for formId:", formId, applications);
+
+    if (applications.length === 0) {
+      console.warn("⚠️ No applications found for formId:", formId);
+      return NextResponse.json([], { status: 200 }); // ✅ Return empty array instead of 404
+    }
+
+    return NextResponse.json(applications, { status: 200 });
+  } catch (error) {
+    console.error("❌ Error fetching applications:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

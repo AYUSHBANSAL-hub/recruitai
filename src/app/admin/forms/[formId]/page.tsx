@@ -1,15 +1,21 @@
 // /admin/forms/[formId]/page.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 
 interface Application {
   id: string;
-  userId: string;
+  userId?: string | null;
   responses: { [key: string]: string };
   resumeUrl: string;
-  status: 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'REJECTED';
+  status: "PENDING" | "REVIEWED" | "SHORTLISTED" | "REJECTED";
+  matchScore?: number | null; // ✅ AI-generated match score (0-100)
+  matchReasoning?: string | null; // ✅ AI's reasoning for the match
+  parsedResume?: {
+    strengths?: string[]; // ✅ Key strengths identified by AI
+    weaknesses?: string[]; // ✅ Weaknesses or missing skills
+  } | null;
 }
 
 export default function ApplicationsList() {
@@ -18,13 +24,13 @@ export default function ApplicationsList() {
 
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         const res = await fetch(`/api/applications?formId=${formId}`);
-        if (!res.ok) throw new Error('Failed to fetch applications');
+        if (!res.ok) throw new Error("Failed to fetch applications");
 
         const data = await res.json();
         setApplications(data);
@@ -38,21 +44,26 @@ export default function ApplicationsList() {
     fetchApplications();
   }, [formId]);
 
-  const updateStatus = async (appId: string, newStatus: Application['status']) => {
+  const updateStatus = async (
+    appId: string,
+    newStatus: Application["status"]
+  ) => {
     try {
       const res = await fetch(`/api/applications/${appId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (!res.ok) throw new Error('Failed to update status');
+      if (!res.ok) throw new Error("Failed to update status");
 
-      setApplications(applications.map(app => 
-        app.id === appId ? { ...app, status: newStatus } : app
-      ));
+      setApplications(
+        applications.map((app) =>
+          app.id === appId ? { ...app, status: newStatus } : app
+        )
+      );
     } catch (err: any) {
-      console.error('Error updating status:', err);
+      console.error("Error updating status:", err);
     }
   };
 
@@ -71,36 +82,78 @@ export default function ApplicationsList() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Candidate</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Resume</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Candidate
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Resume
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Actions
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody>
               {applications.map((app) => (
                 <tr key={app.id} className="hover:bg-gray-100">
-                  <td className="px-6 py-4">{app.userId}</td>
+                  <td className="px-6 py-4">{app.userId || "Anonymous"}</td>
                   <td className="px-6 py-4">
-                    <a href={app.resumeUrl} target="_blank" className="text-blue-600 hover:text-blue-800">
+                    <a
+                      href={app.resumeUrl}
+                      target="_blank"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       View Resume
                     </a>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-md text-sm font-semibold ${
-                      app.status === 'PENDING' ? 'text-yellow-600 bg-yellow-100' :
-                      app.status === 'SHORTLISTED' ? 'text-green-600 bg-green-100' :
-                      app.status === 'REJECTED' ? 'text-red-600 bg-red-100' :
-                      'text-gray-600 bg-gray-100'
-                    }`}>
+                    {app.matchScore !== null ? app.matchScore : "Not Rated"}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div>
+                      <p>
+                        <strong>Strengths:</strong>{" "}
+                        {app.parsedResume?.strengths?.join(", ") || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Weaknesses:</strong>{" "}
+                        {app.parsedResume?.weaknesses?.join(", ") || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Reasoning:</strong>{" "}
+                        {app.matchReasoning || "No insights available"}
+                      </p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-2 py-1 rounded-md text-sm font-semibold ${
+                        app.status === "PENDING"
+                          ? "text-yellow-600 bg-yellow-100"
+                          : app.status === "SHORTLISTED"
+                          ? "text-green-600 bg-green-100"
+                          : app.status === "REJECTED"
+                          ? "text-red-600 bg-red-100"
+                          : "text-gray-600 bg-gray-100"
+                      }`}
+                    >
                       {app.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 flex space-x-2">
-                    <button onClick={() => updateStatus(app.id, 'SHORTLISTED')} className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-700">
+                    <button
+                      onClick={() => updateStatus(app.id, "SHORTLISTED")}
+                      className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-700"
+                    >
                       Shortlist
                     </button>
-                    <button onClick={() => updateStatus(app.id, 'REJECTED')} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-700">
+                    <button
+                      onClick={() => updateStatus(app.id, "REJECTED")}
+                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-700"
+                    >
                       Reject
                     </button>
                   </td>

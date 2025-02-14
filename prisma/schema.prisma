@@ -44,15 +44,16 @@ model Application {
   formId          String
   candidate       User?      @relation(fields: [userId], references: [id])
   userId          String?
-  responses       Json      // Stores form responses
+  responses       Json
   resumeUrl       String
-  parsedResume    Json?     // Stores parsed resume data
-  matchScore      Float?
-  matchReasoning  String?   @db.Text
+  parsedResume    Json?     // ✅ Store extracted resume text
+  matchScore      Float?    // ✅ Store DeepSeek match score
+  matchReasoning  String?   @db.Text // ✅ Store DeepSeek reasoning
   status          ApplicationStatus @default(PENDING)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 }
+
 
 
 enum ApplicationStatus {
