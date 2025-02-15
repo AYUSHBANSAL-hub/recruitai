@@ -32,10 +32,11 @@ export async function POST(request: Request) {
         title,
         jobDescription,
         fields,
-        userId: session.userId,
+        userId: session.userId, // ✅ Ensure this is saved correctly
         active: true,
       },
     });
+    
 
     console.log('Form Created:', form);
     return NextResponse.json(form, { status: 201 });
@@ -47,13 +48,26 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const session = await getSession(); // ✅ Get the logged-in user session
+
+    if (!session) {
+      console.error("Unauthorized: No session found");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log(`Fetching forms for userId: ${session.userId}`);
+
     const forms = await prisma.jobForm.findMany({
-      orderBy: { createdAt: 'desc' },
+      where: { userId: session.userId }, // ✅ Only return forms created by this user
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json(forms, { status: 200 });
   } catch (error) {
-    console.error('Error fetching forms:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Error fetching forms:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
