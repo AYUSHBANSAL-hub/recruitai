@@ -1,8 +1,10 @@
 // src/app/admin/forms/create/page.tsx
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { X, Plus, AlertCircle, FileText, Type, List, Mail, Upload } from 'lucide-react';
 
 interface FormField {
   id: string;
@@ -11,6 +13,11 @@ interface FormField {
   required: boolean;
   options?: string[];
 }
+
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 }
+};
 
 export default function CreateForm() {
   const router = useRouter();
@@ -25,7 +32,7 @@ export default function CreateForm() {
       type,
       label: '',
       required: false,
-      options: type === 'select' ? ['Option 1', 'Option 2'] : undefined, // Defaults for select dropdowns
+      options: type === 'select' ? ['Option 1', 'Option 2'] : undefined,
     };
     setFields([...fields, newField]);
   };
@@ -47,7 +54,6 @@ export default function CreateForm() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // ✅ Ensure we send the auth token manually
           Authorization: `Bearer ${document.cookie.split('; ').find(row => row.startsWith('auth-token='))?.split('=')[1]}`,
         },
         body: JSON.stringify({ title, jobDescription, fields }),
@@ -56,102 +62,200 @@ export default function CreateForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create form');
   
-      console.log('Form created successfully:', data);
       router.push('/admin/forms');
     } catch (err: any) {
       setError(err.message);
-      console.error('Error creating form:', err);
     }
   };
-  
 
   return (
-    <div className="container mx-auto px-4 py-8 text-black">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Create Job Application Form</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
+      <motion.div 
+        initial="initial"
+        animate="animate"
+        variants={fadeIn}
+        className="max-w-4xl mx-auto"
+      >
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+          Create Job Application Form
+        </h1>
+        <p className="text-gray-600 mb-8">Resume upload field will be automatically included in your form.</p>
 
-        {error && <p className="text-red-600">{error}</p>}
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg flex items-center gap-2"
+          >
+            <AlertCircle className="h-5 w-5 text-red-500" />
+            <p className="text-red-700">{error}</p>
+          </motion.div>
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Job Title</label>
-            <input
-              type="text"
-              required
-              className="mt-1 p-2 block w-full rounded-md border-gray-300"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+        <motion.div 
+          variants={fadeIn}
+          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8"
+        >
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
+              <motion.input
+                whileFocus={{ scale: 1.01 }}
+                type="text"
+                required
+                className="w-full px-4 py-3 rounded-lg bg-white border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g., Senior Frontend Developer"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Job Description</label>
-            <textarea
-              required
-              className="mt-1 block w-full rounded-md border-gray-300"
-              rows={5}
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Job Description</label>
+              <motion.textarea
+                whileFocus={{ scale: 1.01 }}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-white border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
+                rows={5}
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Describe the role, responsibilities, and requirements..."
+              />
+            </div>
 
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Form Fields</h2>
             <div className="space-y-4">
-              {fields.map((field) => (
-                <div key={field.id} className="border rounded-lg p-4 bg-gray-50">
-                  <div className="flex justify-between mb-4">
-                    <input
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Form Fields</h2>
+                <div className="flex gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={() => addField('text')}
+                    className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-all duration-200"
+                  >
+                    <Type className="h-4 w-4" />
+                    Text
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={() => addField('textarea')}
+                    className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-all duration-200"
+                  >
+                    <FileText className="h-4 w-4" />
+                    TextArea
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={() => addField('select')}
+                    className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-all duration-200"
+                  >
+                    <List className="h-4 w-4" />
+                    Select
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={() => addField('file')}
+                    className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-all duration-200"
+                  >
+                    <Upload className="h-4 w-4" />
+                    File
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={() => addField('email')}
+                    className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-all duration-200"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Email
+                  </motion.button>
+                </div>
+              </div>
+
+              {fields.map((field, index) => (
+                <motion.div
+                  key={field.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-gray-50 rounded-xl p-6 border border-gray-200"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <motion.input
+                      whileFocus={{ scale: 1.01 }}
                       type="text"
                       placeholder="Field Label"
-                      className="w-2/3 rounded-md border-gray-300 p-2"
+                      className="w-2/3 px-4 py-2 rounded-lg bg-white border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
                       value={field.label}
                       onChange={(e) => updateField(field.id, { label: e.target.value })}
                     />
-                    <button type="button" onClick={() => removeField(field.id)} className="text-red-600 hover:text-red-800">
-                      Remove
-                    </button>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      type="button"
+                      onClick={() => removeField(field.id)}
+                      className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+                    >
+                      <X className="h-5 w-5" />
+                    </motion.button>
                   </div>
 
                   {field.type === 'select' && (
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Options</label>
-                      <input
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Options (comma-separated)</label>
+                      <motion.input
+                        whileFocus={{ scale: 1.01 }}
                         type="text"
-                        placeholder="Comma separated values"
-                        className="w-full rounded-md border-gray-300 p-2 mt-1"
+                        placeholder="Option 1, Option 2, Option 3"
+                        className="w-full px-4 py-2 rounded-lg bg-white border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 outline-none"
                         value={field.options?.join(', ')}
                         onChange={(e) => updateField(field.id, { options: e.target.value.split(', ') })}
                       />
                     </div>
                   )}
 
-                  <label className="flex items-center mt-2">
+                  <label className="flex items-center mt-4">
                     <input
                       type="checkbox"
                       checked={field.required}
                       onChange={(e) => updateField(field.id, { required: e.target.checked })}
-                      className="rounded border-gray-300 text-blue-600"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="ml-2">Required</span>
+                    <span className="ml-2 text-gray-700">Required field</span>
                   </label>
-                </div>
+                </motion.div>
               ))}
             </div>
 
-            <div className="mt-4 space-x-2">
-              <button type="button" onClick={() => addField('text')} className="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">Add Text</button>
-              <button type="button" onClick={() => addField('textarea')} className="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">Add TextArea</button>
-              <button type="button" onClick={() => addField('select')} className="px-3 py-1 bg-gray-100 rounded hover:bg-gray-200">Add Select</button>
+            <div className="flex justify-end gap-4 pt-6">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => router.back()}
+                className="px-6 py-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                Create Form
+              </motion.button>
             </div>
-          </div>
-
-          <div className="flex justify-end space-x-4">
-            <button type="button" onClick={() => router.back()} className="px-4 py-2 border rounded-md hover:bg-gray-50">Cancel</button>
-            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Create Form</button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
