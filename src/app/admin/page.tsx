@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Plus, Users, FileText, Clock } from "lucide-react";
+import FormsList from "./forms/page";
 
 interface Form {
   id: string;
@@ -20,7 +21,7 @@ interface Application {
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 20 }
+  exit: { opacity: 0, y: 20 },
 };
 
 export default function AdminDashboard() {
@@ -32,22 +33,29 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("📢 Fetching forms and applications...");
+
         const [formsRes, applicationsRes] = await Promise.all([
-          fetch('/api/forms'),
-          fetch('/api/applications'),
+          fetch("/api/forms"),
+          fetch("/api/applications"),
         ]);
 
         if (!formsRes.ok || !applicationsRes.ok) {
-          throw new Error('Failed to fetch data');
+          throw new Error(
+            `Failed to fetch data: Forms ${formsRes.status}, Applications ${applicationsRes.status}`
+          );
         }
 
         const formsData = await formsRes.json();
         const applicationsData = await applicationsRes.json();
 
+        console.log("✅ Forms Data:", formsData);
+        console.log("✅ Applications Data:", applicationsData);
+
         setForms(formsData);
         setApplications(applicationsData);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error("❌ Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
       }
@@ -72,7 +80,7 @@ export default function AdminDashboard() {
         className="max-w-7xl mx-auto"
       >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
@@ -101,7 +109,9 @@ export default function AdminDashboard() {
                 <FileText className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-700">Active Forms</h3>
+                <h3 className="text-lg font-semibold text-gray-700">
+                  Active Forms
+                </h3>
                 <p className="text-3xl font-bold text-blue-600">
                   {loading ? "..." : activeForms}
                 </p>
@@ -119,7 +129,9 @@ export default function AdminDashboard() {
                 <Users className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-700">Total Applications</h3>
+                <h3 className="text-lg font-semibold text-gray-700">
+                  Total Applications
+                </h3>
                 <p className="text-3xl font-bold text-green-600">
                   {loading ? "..." : totalApplications}
                 </p>
@@ -137,7 +149,9 @@ export default function AdminDashboard() {
                 <Clock className="h-6 w-6 text-yellow-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-700">Pending Review</h3>
+                <h3 className="text-lg font-semibold text-gray-700">
+                  Pending Review
+                </h3>
                 <p className="text-3xl font-bold text-yellow-600">
                   {loading ? "..." : pendingReviews}
                 </p>
@@ -146,7 +160,7 @@ export default function AdminDashboard() {
           </motion.div>
         </div>
 
-        <motion.div
+        {/* <motion.div
           variants={fadeIn}
           transition={{ delay: 0.4 }}
           className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden"
@@ -203,6 +217,13 @@ export default function AdminDashboard() {
               </table>
             </div>
           )}
+        */}
+        <motion.div
+          variants={fadeIn}
+          transition={{ delay: 0.4 }}
+          className="bg-white/80 backdrop-blur-lg rounded-2xl overflow-hidden"
+        >
+          <FormsList />
         </motion.div>
       </motion.div>
     </div>

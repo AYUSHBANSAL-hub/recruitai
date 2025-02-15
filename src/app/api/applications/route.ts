@@ -111,22 +111,26 @@ export async function GET(request: Request) {
 
     console.log("📢 Received GET request for applications with formId:", formId);
 
-    if (!formId) {
-      console.error("❌ Missing formId in request");
-      return NextResponse.json({ error: "Missing formId" }, { status: 400 });
+    let applications;
+
+    if (formId) {
+      console.log("📊 Fetching applications for specific form...");
+      applications = await prisma.application.findMany({
+        where: { formId },
+        orderBy: { createdAt: "desc" },
+      });
+    } else {
+      console.log("📊 Fetching all applications...");
+      applications = await prisma.application.findMany({
+        orderBy: { createdAt: "desc" },
+      });
     }
 
-    console.log("📊 Fetching applications from DB...");
-    const applications = await prisma.application.findMany({
-      where: { formId },
-      orderBy: { createdAt: "desc" },
-    });
-
-    console.log("✅ Applications Found for formId:", formId, applications.length);
-
+    console.log("✅ Applications Retrieved:", applications.length);
     return NextResponse.json(applications, { status: 200 });
   } catch (error) {
     console.error("❌ Error fetching applications:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
