@@ -1,34 +1,57 @@
 // src/app/page.tsx
-export default function Home() {
+"use client"
+
+import HeroSection from "@/components/HeroSection";
+import FeaturesSection from "@/components/FeaturesSection";
+import HowItWorks from "@/components/HowItWorks";
+import TestimonialsSection from "@/components/TestimonialsSection";
+import PricingSection from "@/components/PricingSection";
+import CTASection from "@/components/CTASection";
+import { useEffect } from "react";
+
+const Index = () => {
+  useEffect(() => {
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+        }
+      });
+    };
+
+    const observerOptions = {
+      threshold: 0.1,
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    document.querySelectorAll(".fade-in-section").forEach((element) => {
+      observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">Recruitment Platform</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-4">Admin Portal</h2>
-          <p className="text-gray-600 mb-4">
-            Create and manage job forms, review applications, and track candidates.
-          </p>
-          <a
-            href="/admin"
-            className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Access Admin Dashboard
-          </a>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-4">Candidate Portal</h2>
-          <p className="text-gray-600 mb-4">
-            View open positions and submit your application.
-          </p>
-          <a
-            href="/jobs"
-            className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            View Open Positions
-          </a>
-        </div>
+    <div className="min-h-screen overflow-hidden">
+      <HeroSection />
+      <div className="fade-in-section">
+        <FeaturesSection />
+      </div>
+      <div className="fade-in-section">
+        <HowItWorks />
+      </div>
+      <div className="fade-in-section">
+        <TestimonialsSection />
+      </div>
+      <div className="fade-in-section">
+        <PricingSection />
+      </div>
+      <div className="fade-in-section">
+        <CTASection />
       </div>
     </div>
   );
-}
+};
+
+export default Index;
