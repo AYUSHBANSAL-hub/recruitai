@@ -58,52 +58,58 @@ export default function ApplyForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
+    
     try {
-      if (!formId) throw new Error("Form ID is missing");
-
+      if (!formId) throw new Error("❌ Form ID is missing");
+  
       console.log("📤 Submitting application for Form ID:", formId);
       let resumeUrl = "";
-
+  
       if (resume) {
         console.log("📤 Uploading resume...");
         const formData = new FormData();
         formData.append("file", resume);
-
+  
         const uploadRes = await fetch("/api/upload-url", {
           method: "POST",
           body: formData,
         });
-
+  
         if (!uploadRes.ok) {
-          throw new Error("Failed to upload resume");
+          const uploadError = await uploadRes.json();
+          throw new Error(`❌ Resume upload failed: ${uploadError.error}`);
         }
-
+  
         const uploadData = await uploadRes.json();
-        resumeUrl = uploadData.url;
+        resumeUrl = uploadData.fileUrl; // ✅ Ensure the correct public file URL is used
         console.log("✅ Resume uploaded successfully:", resumeUrl);
       }
-
+  
+      if (!resumeUrl) throw new Error("❌ Resume upload failed, no URL received");
+  
       const applicationData = { formId, responses, resumeUrl };
-
+  
       console.log("📤 Sending application data to API:", applicationData);
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(applicationData),
       });
-
+  
       const responseData = await res.json();
-      if (!res.ok) throw new Error(`Failed to submit application: ${responseData.error}`);
-
+      if (!res.ok) {
+        throw new Error(`❌ Application submission failed: ${responseData.error}`);
+      }
+  
       console.log("✅ Application submitted successfully:", responseData);
-      alert("Application submitted successfully!");
+      alert("🎉 Application submitted successfully!");
       router.push("/");
     } catch (err: any) {
       console.error("❌ Error during submission:", err);
       setError(err.message);
     }
   };
+  
 
   return (
     <div className="container mx-auto px-4 py-8 text-black">
