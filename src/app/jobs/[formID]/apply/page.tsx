@@ -18,8 +18,7 @@ interface Form {
 
 export default function ApplyForm() {
   const router = useRouter();
-  const { formId } = useParams();
-
+  const { formId } = useParams(); // ✅ Extracting formId from URL
   const [form, setForm] = useState<Form | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,15 +26,13 @@ export default function ApplyForm() {
   const [resume, setResume] = useState<File | null>(null);
 
   useEffect(() => {
-    console.log(formId);
-    if (!formId) return; // Don't fetch if formId is missing
+    if (!formId) return;
 
     const fetchForm = async () => {
       try {
-        console.log("Fetching form with ID:", formId);
+        console.log("🔍 Fetching form with ID:", formId);
         const res = await fetch(`/api/forms/${formId}`);
         if (!res.ok) throw new Error("Failed to fetch form");
-
         const data = await res.json();
         setForm(data);
       } catch (err: any) {
@@ -53,7 +50,7 @@ export default function ApplyForm() {
   };
 
   const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       setResume(e.target.files[0]);
     }
   };
@@ -63,8 +60,13 @@ export default function ApplyForm() {
     setError("");
 
     try {
+      if (!formId) throw new Error("Form ID is missing");
+
+      console.log("📤 Submitting application for Form ID:", formId);
       let resumeUrl = "";
+
       if (resume) {
+        console.log("📤 Uploading resume...");
         const formData = new FormData();
         formData.append("file", resume);
 
@@ -73,30 +75,32 @@ export default function ApplyForm() {
           body: formData,
         });
 
-        if (!uploadRes.ok) throw new Error("Failed to upload resume");
+        if (!uploadRes.ok) {
+          throw new Error("Failed to upload resume");
+        }
 
         const uploadData = await uploadRes.json();
         resumeUrl = uploadData.url;
-        console.log(resumeUrl);
+        console.log("✅ Resume uploaded successfully:", resumeUrl);
       }
 
-      const applicationData = {
-        formId,
-        responses,
-        resumeUrl,
-      };
+      const applicationData = { formId, responses, resumeUrl };
 
+      console.log("📤 Sending application data to API:", applicationData);
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(applicationData),
       });
 
-      if (!res.ok) throw new Error("Failed to submit application");
+      const responseData = await res.json();
+      if (!res.ok) throw new Error(`Failed to submit application: ${responseData.error}`);
 
+      console.log("✅ Application submitted successfully:", responseData);
       alert("Application submitted successfully!");
       router.push("/");
     } catch (err: any) {
+      console.error("❌ Error during submission:", err);
       setError(err.message);
     }
   };
@@ -115,9 +119,7 @@ export default function ApplyForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {form.fields.map((field) => (
               <div key={field.id}>
-                <label className="block text-sm font-medium text-gray-700">
-                  {field.label}
-                </label>
+                <label className="block text-sm font-medium text-gray-700">{field.label}</label>
                 {field.type === "text" || field.type === "email" ? (
                   <input
                     type={field.type}
@@ -149,21 +151,11 @@ export default function ApplyForm() {
             ))}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Upload Resume
-              </label>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={handleResumeUpload}
-                className="mt-1"
-              />
+              <label className="block text-sm font-medium text-gray-700">Upload Resume</label>
+              <input type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="mt-1" />
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded-md"
-            >
+            <button type="submit" className="w-full py-2 px-4 bg-blue-600 text-white rounded-md">
               Submit Application
             </button>
           </form>

@@ -17,19 +17,26 @@ export async function analyzeResumeWithGPT(resumeText: string, jobDescription: s
       `;
   
       const payload = JSON.stringify([
-        { "role": "system", "content": "You are an expert AI analyzing resumes for job fit." },
-        { "role": "user", "content": prompt }
+        { role: "system", content: "You are an AI analyzing resumes for job fit." },
+        { role: "user", content: prompt }
       ]);
   
-      console.log("📤 Sending Payload to GPT-3:", payload);
+      console.log("📤 Sending Payload to GPT-3...");
   
-      const response = await fetch('https://acciojob-doubt-support-eobnd7jx2q-el.a.run.app/doubt-support/test-prompt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: payload,
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000); // 20s timeout
+  
+      let response;
+      try {
+        response = await fetch('https://acciojob-doubt-support-eobnd7jx2q-el.a.run.app/doubt-support/test-prompt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
   
       console.log("📥 Response Received from GPT-3:", response.status);
   
@@ -40,11 +47,15 @@ export async function analyzeResumeWithGPT(resumeText: string, jobDescription: s
       const jsonResponse = await response.json();
       console.log("✅ GPT-3 Analysis Response:", JSON.stringify(jsonResponse, null, 2));
   
+      if (!jsonResponse.data || typeof jsonResponse.data.matchScore !== "number") {
+        throw new Error("Invalid AI response format");
+      }
+  
       return {
-        matchScore: jsonResponse.data?.matchScore || 0, // Default to 0 if missing
-        strengths: jsonResponse.data?.strengths || [],
-        weaknesses: jsonResponse.data?.weaknesses || [],
-        reasoning: jsonResponse.data?.reasoning || "No reasoning provided",
+        matchScore: jsonResponse.data.matchScore || 0,
+        strengths: jsonResponse.data.strengths || [],
+        weaknesses: jsonResponse.data.weaknesses || [],
+        reasoning: jsonResponse.data.reasoning || "No reasoning provided",
       };
     } catch (error) {
       console.error("❌ GPT-3 API Error:", error);
