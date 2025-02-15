@@ -124,7 +124,7 @@ export default function FormsList() {
                       </td>
                       <td className="px-6 py-4">
                         <Link
-                          href={`/admin/forms/${form.id} ⁠`}
+                          href={`/admin/forms/${form.id}`}
                           className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
                         >
                           <Eye className="h-4 w-4" />
