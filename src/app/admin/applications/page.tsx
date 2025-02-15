@@ -80,7 +80,7 @@ export default function ApplicationsPage() {
         </div>
 
         {/* Application Details */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow">
+        {/* <div className="lg:col-span-2 bg-white rounded-lg shadow">
           {selectedApp ? (
             <ApplicationDetails applicationId={selectedApp} />
           ) : (
@@ -88,7 +88,7 @@ export default function ApplicationsPage() {
               Select an application to view details
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );
