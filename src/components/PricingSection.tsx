@@ -70,15 +70,15 @@ const PricingSection = () => {
                   </span>
                 </div>
               )}
-              <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+              <h3 className="text-2xl text-black font-bold mb-2">{plan.name}</h3>
               <div className="mb-4">
-                <span className="text-4xl font-bold">{plan.price}</span>
+                <span className="text-4xl text-black font-bold">{plan.price}</span>
                 {plan.price !== "Custom" && <span className="text-gray-600">/month</span>}
               </div>
               <p className="text-gray-600 mb-6">{plan.description}</p>
               <ul className="space-y-4 mb-8">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2">
+                  <li key={i} className="flex items-start gap-2 text-black">
                     <Check className="w-5 h-5 text-blue-600 mt-0.5" />
                     <span>{feature}</span>
                   </li>
