@@ -64,7 +64,7 @@ const FeaturesSection = () => {
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${feature.gradient} bg-opacity-10 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform duration-300`}>
                   <feature.icon className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4 text-center">
+                <h3 className="text-xl font-semibold mb-4 text-black text-center">
                   {feature.title}
                 </h3>
                 <p className="text-gray-600 text-center">{feature.description}</p>

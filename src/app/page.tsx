@@ -33,7 +33,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-hidden">
+    <div className="min-h-screen overflow-hidden ">
       <HeroSection />
       <div className="fade-in-section">
         <FeaturesSection />

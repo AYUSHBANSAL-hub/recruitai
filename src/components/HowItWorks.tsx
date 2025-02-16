@@ -60,7 +60,7 @@ const HowItWorks = () => {
                     <Check className="w-4 h-4 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                    <h3 className="text-xl text-black font-semibold mb-2">{step.title}</h3>
                     <p className="text-gray-600">{step.description}</p>
                   </div>
                 </div>

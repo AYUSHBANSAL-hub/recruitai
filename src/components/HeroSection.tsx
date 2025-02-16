@@ -43,12 +43,12 @@ const HeroSection = () => {
 
       <div className="container mx-auto px-4 z-10">
         <div className="text-center max-w-4xl mx-auto animate-slide-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
-            <Bot className="w-4 h-4" />
+          <div className="inline-flex  items-center gap-2 px-4 py-2 mb-6 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
+            <Bot className="w-4 h-4 " />
             Powered by AI
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-black">
             Welcome to <span className="gradient-text">ResumeAI</span>
           </h1>
 
@@ -90,7 +90,7 @@ const HeroSection = () => {
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
                 <stat.icon className="w-8 h-8 text-blue-600 mx-auto mb-3" />
-                <h3 className="text-lg font-semibold mb-1">{stat.value}</h3>
+                <h3 className="text-lg font-semibold mb-1 text-black">{stat.value}</h3>
                 <p className="text-gray-600 text-sm">{stat.label}</p>
               </div>
             ))}

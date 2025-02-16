@@ -41,7 +41,7 @@ const TestimonialsSection = () => {
               <Quote className="w-8 h-8 text-blue-600 mb-4" />
               <p className="text-gray-600 mb-6 italic">"{testimonial.quote}"</p>
               <div className="mt-auto">
-                <p className="font-semibold">{testimonial.author}</p>
+                <p className="font-semibold text-black">{testimonial.author}</p>
                 <p className="text-sm text-gray-500">{testimonial.position}</p>
                 <p className="text-sm text-blue-600">{testimonial.company}</p>
               </div>
