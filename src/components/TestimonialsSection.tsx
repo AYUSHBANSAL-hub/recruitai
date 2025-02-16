@@ -4,7 +4,7 @@ import { Quote } from "lucide-react";
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      quote: "ResumeAI has revolutionized our hiring process. We've reduced our time-to-hire by 60% and found better-qualified candidates.",
+      quote: "RecruitAI has revolutionized our hiring process. We've reduced our time-to-hire by 60% and found better-qualified candidates.",
       author: "Sarah Johnson",
       position: "HR Director",
       company: "TechCorp Inc."
@@ -31,7 +31,7 @@ const TestimonialsSection = () => {
             Trusted by Industry Leaders
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            See what our customers say about ResumeAI
+            See what our customers say about RecruitAI
           </p>
         </div>
 
