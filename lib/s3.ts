@@ -15,6 +15,7 @@ const s3Client = new S3Client({
   },
 });
 
+
 export async function generateUploadUrl(
   fileType: string
 ): Promise<{ uploadUrl: string; fileUrl: string }> {
@@ -26,11 +27,12 @@ export async function generateUploadUrl(
   const command = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME!,
     Key: fileKey,
-    ContentType: fileType || "application/octet-stream",
-    ACL: "bucket-owner-full-control", // ✅ Ensure bucket owner has control
-    Metadata: {
-        "x-amz-meta-content-type": fileType || "application/octet-stream",
-    },
+    ContentType: fileType,
+    ACL: "public-read"
+    // ACL: "bucket-owner-full-control", // ✅ Ensure bucket owner has control
+    // Metadata: {
+    //     "x-amz-meta-content-type": fileType || "application/octet-stream",
+    // },
 });
 
 

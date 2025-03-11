@@ -3,9 +3,7 @@ import { generateUploadUrl } from "../../../../lib/s3";
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const fileType = formData.get("fileType") as string | null; // Ensure correct type
-
+    const { fileType } = await request.json();
     if (!fileType || typeof fileType !== "string") {
       return NextResponse.json({ error: "Missing or invalid file type" }, { status: 400 });
     }
@@ -17,9 +15,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ uploadUrl, fileUrl }, { status: 200 });
   } catch (error) {
     console.error("Error generating upload URL:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

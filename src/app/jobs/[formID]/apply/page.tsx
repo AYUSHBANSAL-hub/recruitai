@@ -18,19 +18,24 @@ interface Form {
 
 export default function ApplyForm() {
   const router = useRouter();
-  const { formId } = useParams(); // ✅ Extracting formId from URL
+  const params = useParams(); // ✅ Extracting formId from URL
+  const [formId, setFormId] = useState<string | string[] | undefined>("");
   const [form, setForm] = useState<Form | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState("");
   const [responses, setResponses] = useState<{ [key: string]: string }>({});
   const [resume, setResume] = useState<File | null>(null);
+  useEffect(()=>{
+    if(params){
+      setFormId(params.formID);
+    }
+  },[params])
 
   useEffect(() => {
     if (!formId) return;
 
     const fetchForm = async () => {
       try {
-        console.log("🔍 Fetching form with ID:", formId);
         const res = await fetch(`/api/forms/${formId}`);
         if (!res.ok) throw new Error("Failed to fetch form");
         const data = await res.json();
@@ -54,6 +59,43 @@ export default function ApplyForm() {
       setResume(e.target.files[0]);
     }
   };
+  const extractPublicUrl = (uploadUrl:string) => {
+    return uploadUrl.split("?")[0]; // Removes query params
+  };
+  const uploadFileToS3 = async (file: File): Promise<string> => {
+    try {
+      console.log("📤 Requesting pre-signed URL...");
+      const res = await fetch("/api/upload-url", {
+        method: "POST",
+        body: JSON.stringify({ fileType: file.type }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) throw new Error("Failed to get pre-signed URL");
+
+      const { uploadUrl, fileUrl } = await res.json();
+
+      console.log("✅ Pre-signed URL received:", uploadUrl);
+      console.log("📂 Expected file URL:", fileUrl);
+
+      // Upload file to S3 using PUT request
+      console.log("📤 Uploading file to S3...");
+      const uploadRes = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      if (!uploadRes.ok) throw new Error("Failed to upload file to S3");
+
+      console.log(extractPublicUrl(uploadRes.url));
+
+      return fileUrl;
+    } catch (error: any) {
+      console.error("❌ Error uploading file:", error);
+      throw new Error(error.message);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,30 +104,11 @@ export default function ApplyForm() {
     try {
       if (!formId) throw new Error("❌ Form ID is missing");
       console.log("📤 Submitting application for Form ID:", formId);
+
       let resumeUrl = "";
-
       if (resume) {
-        console.log("📤 Uploading resume...");
-        const formData = new FormData();
-        formData.append("file", resume);
-        formData.append("fileType", resume.type); // ✅ Ensure file type is sent
-
-        const uploadRes = await fetch("/api/upload-url", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          const uploadError = await uploadRes.json();
-          throw new Error(`❌ Resume upload failed: ${uploadError.error}`);
-        }
-
-        const uploadData = await uploadRes.json();
-        resumeUrl = uploadData.fileUrl; // ✅ Ensure correct URL is used
-        console.log("✅ Resume uploaded successfully:", resumeUrl);
+        resumeUrl = await uploadFileToS3(resume);
       }
-
-      if (!resumeUrl) throw new Error("❌ Resume upload failed, no URL received");
 
       const applicationData = { formId, responses, resumeUrl };
 
@@ -103,7 +126,7 @@ export default function ApplyForm() {
 
       console.log("✅ Application submitted successfully");
       alert("🎉 Application submitted successfully!");
-      router.push("/");
+      // router.push("/");
     } catch (err: any) {
       console.error("❌ Error during submission:", err);
       setError(err.message);
