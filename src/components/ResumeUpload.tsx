@@ -1,4 +1,3 @@
-// src/components/ResumeUpload.tsx
 'use client';
 
 import { useState } from 'react';
@@ -15,9 +14,10 @@ export default function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type (PDF & Word only)
     if (!['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
         .includes(file.type)) {
-      setError('Please upload a PDF or Word document');
+      setError('❌ Please upload a valid PDF or Word document');
       return;
     }
 
@@ -25,26 +25,42 @@ export default function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
       setUploading(true);
       setError(null);
 
-      // Get presigned URL
+      console.log("📤 Requesting upload URL for:", file.name);
+
+      // ✅ Use FormData to send fileType to API
+      const formData = new FormData();
+      formData.append("fileType", file.type);
+
       const response = await fetch('/api/upload-url', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileType: file.type }),
+        body: formData,
       });
-      
-      const { uploadUrl, fileUrl } = await response.json();
 
-      // Upload file directly to S3
-      await fetch(uploadUrl, {
+      if (!response.ok) {
+        const errorRes = await response.json();
+        throw new Error(errorRes.error || '❌ Failed to get upload URL');
+      }
+
+      const { uploadUrl, fileUrl } = await response.json();
+      console.log("✅ Received upload URL:", uploadUrl);
+
+      // ✅ Upload the file to S3
+      const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
         headers: { 'Content-Type': file.type },
       });
 
-      onUploadComplete(fileUrl);
-    } catch (err) {
-      setError('Failed to upload file. Please try again.');
-      console.error('Upload error:', err);
+      if (!uploadResponse.ok) {
+        throw new Error('❌ Failed to upload file to S3');
+      }
+
+      console.log("✅ Resume uploaded successfully:", fileUrl);
+      onUploadComplete(fileUrl); // Pass the URL to parent component
+
+    } catch (err: any) {
+      setError(err.message);
+      console.error("❌ Upload error:", err);
     } finally {
       setUploading(false);
     }
@@ -67,16 +83,9 @@ export default function ResumeUpload({ onUploadComplete }: ResumeUploadProps) {
           />
         </label>
       </div>
-      {uploading && (
-        <div className="text-center text-gray-600">
-          Uploading...
-        </div>
-      )}
-      {error && (
-        <div className="text-center text-red-500">
-          {error}
-        </div>
-      )}
+
+      {uploading && <div className="text-center text-gray-600">⏳ Uploading...</div>}
+      {error && <div className="text-center text-red-500">{error}</div>}
     </div>
   );
 }
