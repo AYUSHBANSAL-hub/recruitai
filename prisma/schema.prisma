@@ -52,6 +52,8 @@ model Application {
   status          ApplicationStatus @default(PENDING)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  strengths       String[]  // ✅ Array to store candidate strengths
+  weaknesses      String[] 
 }
 
 enum ApplicationStatus {

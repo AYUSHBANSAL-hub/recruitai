@@ -24,6 +24,8 @@ interface Application {
   status: "PENDING" | "REVIEWED" | "SHORTLISTED" | "REJECTED"
   matchScore?: number | null // ✅ AI-generated match score (0-100)
   matchReasoning?: string | null // ✅ AI's reasoning for the match
+  strengths:string[],
+  weaknesses:string[],
   parsedResume?: {
     strengths?: string[] // ✅ Key strengths identified by AI
     weaknesses?: string[] // ✅ Weaknesses or missing skills
@@ -501,9 +503,9 @@ export default function ApplicationsList() {
                                         </div>
                                       </CardHeader>
                                       <CardContent className="p-4">
-                                        {app.parsedResume?.strengths?.length ? (
+                                        {app.strengths?.length ? (
                                           <ul className="space-y-2">
-                                            {app.parsedResume.strengths.map((strength, idx) => (
+                                            {app.strengths.map((strength, idx) => (
                                               <li key={idx} className="flex items-start gap-2">
                                                 <div className="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                                                   <span className="text-xs text-emerald-700 font-medium">✓</span>
@@ -527,9 +529,9 @@ export default function ApplicationsList() {
                                         </div>
                                       </CardHeader>
                                       <CardContent className="p-4">
-                                        {app.parsedResume?.weaknesses?.length ? (
+                                        {app.weaknesses?.length ? (
                                           <ul className="space-y-2">
-                                            {app.parsedResume.weaknesses.map((weakness, idx) => (
+                                            {app.weaknesses.map((weakness, idx) => (
                                               <li key={idx} className="flex items-start gap-2">
                                                 <div className="h-5 w-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                                                   <span className="text-xs text-amber-700 font-medium">!</span>

@@ -100,10 +100,6 @@ export default function ApplyForm() {
     fetchForm();
   }, [formId]);
 
-  useEffect(() => {
-    console.log("📂 Updated Resume State:", resume);
-  }, [resume]);
-
   const handleChange = (fieldId: string, value: string) => {
     setResponses({ ...responses, [fieldId]: value });
 
@@ -144,10 +140,6 @@ export default function ApplyForm() {
       console.log("✅ Resume selected:", file.name);
       setResume(file);
     }
-  };
-
-  const extractPublicUrl = (uploadUrl: string) => {
-    return uploadUrl.split("?")[0]; // Removes query params
   };
 
   const uploadFileToS3 = async (file: File): Promise<string> => {

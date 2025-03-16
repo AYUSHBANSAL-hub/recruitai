@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { analyzeResumeWithGPT } from "../../../../lib/gpt"; // ✅ Import GPT-3 function
 import { fetchAndParseResume } from "../../../../lib/resumeParsing";
+import { analyzeResumeWithGemini } from "../../../../lib/openRouter";
 
 const prisma = new PrismaClient();
 
@@ -25,10 +26,12 @@ async function storeApplication(formId: string, responses: any, resumeUrl: strin
       userId: null,
       responses,
       resumeUrl,
-      parsedResume: null,
+      parsedResume: undefined,
       matchScore: null,
       matchReasoning: null,
       status: "PENDING",
+      strengths:[],
+      weaknesses:[]
     },
   });
 }
@@ -43,7 +46,7 @@ async function processResumeAI(applicationId: string, resumeUrl: string, jobDesc
     // console.log("✅ Extracted Resume Text:", resumeText.substring(0, 500));
 
     console.log("🔍 Calling AI to analyze resume...");
-    const analysis = await analyzeResumeWithGPT(resumeText, jobDescription);
+    const analysis = await analyzeResumeWithGemini(resumeText, jobDescription);
     // Simulating AI response (for debugging)
     // const analysis = { matchScore: 85, reasoning: "Good alignment with job requirements" };
 
@@ -55,6 +58,8 @@ async function processResumeAI(applicationId: string, resumeUrl: string, jobDesc
         parsedResume: { text: resumeText },
         matchScore: analysis.matchScore,
         matchReasoning: analysis.reasoning,
+        strengths : analysis.strengths,
+        weaknesses : analysis.weaknesses,
       },
     });
 

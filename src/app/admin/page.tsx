@@ -12,6 +12,10 @@ import {
   Calendar,
   Briefcase,
   Search,
+  Clipboard,
+  ArrowUpRight,
+  Copy,
+  CopyCheck,
 } from "lucide-react";
 import {
   Card,
@@ -33,6 +37,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 interface Form {
   id: string;
@@ -67,6 +72,7 @@ const fadeIn = {
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const [copiedId, setCopiedId] = useState(null);
   const [forms, setForms] = useState<Form[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [recentApplications, setRecentApplications] = useState<Application[]>(
@@ -541,17 +547,23 @@ export default function AdminDashboard() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-gray-50">
-                    <TableRow>
-                      <TableHead className="font-semibold">Job Title</TableHead>
-                      <TableHead className="font-semibold">Created</TableHead>
-                      <TableHead className="font-semibold">
+                    <TableRow className="text-center">
+                      <TableHead className="font-semibold text-left">
+                        Job Title
+                      </TableHead>
+                      <TableHead className="font-semibold text-center">
+                        Created
+                      </TableHead>
+                      <TableHead className="font-semibold text-center">
                         Applications
                       </TableHead>
-                      <TableHead className="font-semibold">Status</TableHead>
-                      <TableHead className="font-semibold text-right">
+                      <TableHead className="font-semibold text-center">
+                        Status
+                      </TableHead>
+                      <TableHead className="font-semibold text-center">
                         Actions
                       </TableHead>
-                      <TableHead className="font-semibold text-right">
+                      <TableHead className="font-semibold text-center">
                         Form Links
                       </TableHead>
                     </TableRow>
@@ -560,9 +572,9 @@ export default function AdminDashboard() {
                     {filteredForms.map((form) => (
                       <TableRow
                         key={form.id}
-                        className="hover:bg-gray-50 border-b border-gray-200"
+                        className="hover:bg-gray-50 border-b border-gray-200 text-center"
                       >
-                        <TableCell className="font-medium">
+                        <TableCell className="font-medium text-left">
                           <div className="flex items-center gap-3">
                             <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center">
                               <Briefcase className="h-5 w-5 text-indigo-600" />
@@ -571,7 +583,7 @@ export default function AdminDashboard() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             <Calendar className="h-4 w-4 text-gray-400" />
                             <span>
                               {new Date(form.createdAt).toLocaleDateString()}
@@ -579,7 +591,7 @@ export default function AdminDashboard() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             <Users className="h-4 w-4 text-gray-400" />
                             <span>{form.applicationsCount || 0}</span>
                           </div>
@@ -595,7 +607,7 @@ export default function AdminDashboard() {
                             {form.active ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell>
                           <Button
                             variant="outline"
                             size="sm"
@@ -607,18 +619,45 @@ export default function AdminDashboard() {
                             View Applications
                           </Button>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                            onClick={() =>
-                              window.open(`/jobs/${form.id}/apply`, "_blank")
-                            }
-                          >
-                            Open Apply link
-                          </Button>
-                        </TableCell>
+                        <TableCell>
+                  <div className="flex items-center justify-center gap-2">
+                    {/* Copy Icon Button */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`transition-colors duration-300 ${
+                        copiedId === form.id
+                          ? "bg-green-100 text-green-600 hover:bg-green-200"
+                          : "text-indigo-600 hover:bg-indigo-50"
+                      }`}
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/jobs/${form.id}/apply`)
+                        setCopiedId(form.id) // Set copied state for this specific form
+
+                        // Show toast notification
+                        toast("Link Copied to Clipboard")
+
+                        setTimeout(() => setCopiedId(null), 2000)
+                      }}
+                    >
+                      {copiedId === form.id ? (
+                        <CopyCheck className="h-5 w-5" /> // Show check icon if copied
+                      ) : (
+                        <Copy className="h-5 w-5" /> // Show copy icon if not copied
+                      )}
+                    </Button>
+
+                    {/* Go to Link Icon Button */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-indigo-600 hover:bg-indigo-50"
+                      onClick={() => window.open(`/jobs/${form.id}/apply`, "_blank")}
+                    >
+                      <ArrowUpRight className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

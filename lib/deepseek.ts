@@ -31,6 +31,7 @@ export async function analyzeResume(resumeText: string, jobDescription: string) 
     // Parse the response to extract structured data
     const analysis = response.choices[0].message.content;
     // Add your parsing logic here
+    console.log(analysis)
 
     return {
       score: 85, // Replace with actual parsed score

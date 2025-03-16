@@ -1,23 +1,10 @@
 export async function analyzeResumeWithGPT(resumeText: string, jobDescription: string) {
   try {
-    console.log("🔄 Sending resume to GPT-3 for analysis...");
-
-    // const prompt = `
-    // Compare this resume with the job description provided. Analyze the match and return:
-    // 1. A match score from 0 to 100.
-    // 2. Key strengths of the candidate.
-    // 3. Weaknesses or missing skills.
-    // 4. A brief reasoning for the score.
-
-    // Job Description:
-    // ${jobDescription}
-
-    // Resume:
-    // ${resumeText}
-    // `;
-
     const payload = JSON.stringify([
-      { role: "system", content: "You are an advanced AI-powered hiring assistant specializing in resume screening. Your task is to evaluate a candidate’s resume against a given Job Description (JD) and provide a structured JSON response with:\n\n1. *Match Score (Out of 10): How well the resume aligns with the JD.\n2. **Strengths: Key strong points relevant to the role.\n3. **Weaknesses: Gaps in experience, skills, or qualifications.\n4. **What to Improve?: Specific, actionable improvements to enhance the resume’s match with the JD.\n\n---\n\nEvaluation Criteria:\n- **Technical Skills & Requirements:* Does the resume clearly list required technologies, programming languages, and tools mentioned in the JD?\n- *Work Experience & Project Alignment:* Are past roles and projects relevant? Are contributions quantifiable?\n- *Soft Skills & Culture Fit:* Is teamwork, leadership, or problem-solving demonstrated?\n- *Resume Presentation & Completeness:* Is the resume structured well, avoiding unnecessary details while highlighting key strengths?\n\n---\n\n*Response Format (JSON):\n⁠  json\n{\n  \"match_score\": X,  // Score out of 10\n  \"strengths\": [\"Strength 1\", \"Strength 2\", \"Strength 3\"],\n  \"weaknesses\": [\"Weakness 1\", \"Weakness 2\", \"Weakness 3\"],\n  \"improvements\": [\"Improvement 1\", \"Improvement 2\", \"Improvement 3\"]\n}\n  ⁠\n---\n\nProvide a precise evaluation ensuring **role-based relevance*." },
+      {
+        "role": "system",
+        "content": "You are an advanced AI-powered hiring assistant specializing in resume screening. Your task is to evaluate a candidate’s resume against a given Job Description (JD) and provide a structured JSON response with: 1. Match Score (Out of 10): How well the resume aligns with the JD. 2. Strengths: A list of key strong points relevant to the role. 3. Weaknesses: A list of gaps in experience, skills, or qualifications. 4. Reasoning: A concise explanation of why the match score was given. Evaluation Criteria: - Technical Skills & Requirements: Does the resume clearly list required technologies, programming languages, and tools mentioned in the JD? - Work Experience & Project Alignment: Are past roles and projects relevant? Are contributions quantifiable? - Soft Skills & Culture Fit: Is teamwork, leadership, or problem-solving demonstrated? - Resume Presentation & Completeness: Is the resume structured well, avoiding unnecessary details while highlighting key strengths? Response Format (JSON): {\"match_score\": X, \"strengths\": [\"Strength 1\", \"Strength 2\", \"Strength 3\"], \"weaknesses\": [\"Weakness 1\", \"Weakness 2\", \"Weakness 3\"], \"reasoning\": \"Brief explanation of the match score.\"} Example Input: Job Description: {jobDescription} Candidate's Resume: {resumeText} Provide a precise evaluation ensuring role-based relevance. Respond only in the structured JSON format provided above."
+      },      
       {
         "role": "user",
         "content": "### Job Description:\n\n" + jobDescription +
@@ -56,31 +43,13 @@ export async function analyzeResumeWithGPT(resumeText: string, jobDescription: s
     if (!jsonResponse.data) {
       throw new Error("Invalid AI response format");
     }
-
-    // Parsing text-based response into structured format
-    const responseText: string = jsonResponse.data;
-
-    // Extracting Match Score
-    const matchScoreMatch = responseText.match(/Match Score: (\d+)\/100/);
-    const matchScore = matchScoreMatch ? parseInt(matchScoreMatch[1]) : 0;
-
-    // Extracting Key Strengths
-    const strengthsMatch = responseText.match(/Key Strengths:\n([\s\S]*?)\n\n/);
-    const strengths = strengthsMatch ? strengthsMatch[1].split("\n").map(s => s.trim().replace(/^-/, "").trim()) : [];
-
-    // Extracting Weaknesses
-    const weaknessesMatch = responseText.match(/Weaknesses or Missing Skills:\n([\s\S]*?)\n\n/);
-    const weaknesses = weaknessesMatch ? weaknessesMatch[1].split("\n").map(w => w.trim().replace(/^-/, "").trim()) : [];
-
-    // Extracting Reasoning
-    const reasoningMatch = responseText.match(/Brief Reasoning for the Score:\n([\s\S]*)/);
-    const reasoning = reasoningMatch ? reasoningMatch[1].trim() : "No reasoning provided.";
+    const parsedData = JSON.parse(jsonResponse.data);
 
     return {
-      matchScore,
-      strengths,
-      weaknesses,
-      reasoning,
+      matchScore: parsedData.match_score || 0,
+      strengths: parsedData.strengths || [],
+      weaknesses: parsedData.weaknesses || [],
+      reasoning: parsedData.reasoning || []
     };
   } catch (error) {
     console.error("❌ GPT-3 API Error:", error);

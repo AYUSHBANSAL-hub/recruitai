@@ -36,6 +36,8 @@ interface Application {
     strengths?: string[]
     weaknesses?: string[]
   } | null
+  strengths:string[],
+  weaknesses:string[]
   createdAt?: string
   formId?: string
 }
@@ -411,7 +413,7 @@ function ApplicationsList() {
                                 value={app.matchScore || 0}
                                 max={100}
                                 className="h-1.5 w-16 bg-gray-100 mt-1"
-                                indicatorClassName={getScoreProgressColor(app.matchScore)}
+                                // indicatorClassName={getScoreProgressColor(app.matchScore)}
                               />
                             </div>
                           </TooltipTrigger>
@@ -585,7 +587,7 @@ function ApplicationsList() {
                           value={selectedApp.matchScore || 0}
                           max={100}
                           className="h-2 bg-gray-100"
-                          indicatorClassName={getScoreProgressColor(selectedApp.matchScore)}
+                          // indicatorClassName={getScoreProgressColor(selectedApp.matchScore)}
                         />
                       </div>
                     </CardContent>
@@ -601,9 +603,9 @@ function ApplicationsList() {
                       </div>
                     </CardHeader>
                     <CardContent className="p-4">
-                      {selectedApp.parsedResume?.strengths?.length ? (
+                      {selectedApp.strengths?.length ? (
                         <ul className="space-y-2">
-                          {selectedApp.parsedResume.strengths.map((strength, idx) => (
+                          {selectedApp.strengths.map((strength, idx) => (
                             <li key={idx} className="flex items-start gap-2">
                               <div className="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                                 <span className="text-xs text-emerald-700 font-medium">✓</span>
@@ -626,9 +628,9 @@ function ApplicationsList() {
                       </div>
                     </CardHeader>
                     <CardContent className="p-4">
-                      {selectedApp.parsedResume?.weaknesses?.length ? (
+                      {selectedApp.weaknesses?.length ? (
                         <ul className="space-y-2">
-                          {selectedApp.parsedResume.weaknesses.map((weakness, idx) => (
+                          {selectedApp.weaknesses.map((weakness, idx) => (
                             <li key={idx} className="flex items-start gap-2">
                               <div className="h-5 w-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                                 <span className="text-xs text-amber-700 font-medium">!</span>
