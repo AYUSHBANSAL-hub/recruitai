@@ -1,15 +1,15 @@
-// src/lib/deepseek.ts
+// src/lib/openrouter.ts
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com/v1', // Adjust based on actual DeepSeek API endpoint
+  apiKey: process.env.OPENROUTER_API_KEY,
+  baseURL: 'https://openrouter.ai/api/v1', // Adjust based on actual OpenRouter API endpoint
 });
 
 export async function analyzeResume(resumeText: string, jobDescription: string) {
   try {
     const prompt = `
-    Compare this job description and resume. Provide:
+    Compare the following job description and resume. Provide a structured analysis including:
     1. Match score (0-100)
     2. Key matching qualifications
     3. Missing qualifications
@@ -23,17 +23,17 @@ export async function analyzeResume(resumeText: string, jobDescription: string) 
     `;
 
     const response = await openai.chat.completions.create({
-      model: 'deepseek-chat', // Replace with actual DeepSeek model name
+      model: 'google/gemini-2.0-flash-001', // OpenRouter model
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3,
     });
 
-    // Parse the response to extract structured data
+    // Extract structured data from the response
     const analysis = response.choices[0].message.content;
-    // Add your parsing logic here
+    // Implement parsing logic here
 
     return {
-      score: 85, // Replace with actual parsed score
+      matchScore: 85, // Replace with actual parsed score
       matching_qualifications: [], // Replace with parsed qualifications
       missing_qualifications: [], // Replace with parsed missing qualifications
       reasoning: analysis,
@@ -43,4 +43,3 @@ export async function analyzeResume(resumeText: string, jobDescription: string) 
     throw error;
   }
 }
-
