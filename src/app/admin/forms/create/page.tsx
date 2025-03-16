@@ -1,7 +1,6 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import type React from "react";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -123,6 +122,19 @@ export default function CreateForm() {
   const [activeTab, setActiveTab] = useState("details");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Add a state to store the token
+  const [authToken, setAuthToken] = useState("");
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const cookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("auth-token="));
+  
+      setAuthToken(cookie ? cookie.split("=")[1] : ""); // Fallback to empty string
+    }
+  }, []);  
+
   // All fields combined (fixed + custom)
   const allFields = [...fixedFields, ...customFields];
 
@@ -187,12 +199,7 @@ export default function CreateForm() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${
-            document.cookie
-              .split("; ")
-              .find((row) => row.startsWith("auth-token="))
-              ?.split("=")[1]
-          }`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           title,
