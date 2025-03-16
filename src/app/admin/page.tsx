@@ -1,231 +1,474 @@
-"use client";
+"use client"
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Plus, Users, FileText, Clock } from "lucide-react";
-import FormsList from "./forms/page";
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { Plus, Users, FileText, Clock, CheckCircle, ChevronRight, Calendar, Briefcase, Search } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Progress } from "@/components/ui/progress"
 
 interface Form {
-  id: string;
-  title: string;
-  createdAt: string;
-  active: boolean;
+  id: string
+  title: string
+  createdAt: string
+  active: boolean
+  applicationsCount?: number
 }
 
 interface Application {
-  id: string;
-  status: string;
+  id: string
+  status: string
+  formId?: string
+  userId?: string
+  createdAt?: string
+}
+
+interface DashboardStats {
+  totalForms: number
+  activeForms: number
+  totalApplications: number
+  pendingReviews: number
+  shortlisted: number
+  rejected: number
 }
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: 20 },
-};
+}
 
 export default function AdminDashboard() {
-  const router = useRouter();
-  const [forms, setForms] = useState<Form[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter()
+  const [forms, setForms] = useState<Form[]>([])
+  const [applications, setApplications] = useState<Application[]>([])
+  const [recentApplications, setRecentApplications] = useState<Application[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [stats, setStats] = useState<DashboardStats>({
+    totalForms: 0,
+    activeForms: 0,
+    totalApplications: 0,
+    pendingReviews: 0,
+    shortlisted: 0,
+    rejected: 0,
+  })
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("📢 Fetching forms and applications...");
-
-        const [formsRes, applicationsRes] = await Promise.all([
-          fetch("/api/forms"),
-          fetch("/api/applications"),
-        ]);
+        const [formsRes, applicationsRes] = await Promise.all([fetch("/api/forms"), fetch("/api/applications")])
 
         if (!formsRes.ok || !applicationsRes.ok) {
-          throw new Error(
-            `Failed to fetch data: Forms ${formsRes.status}, Applications ${applicationsRes.status}`
-          );
+          throw new Error(`Failed to fetch data: Forms ${formsRes.status}, Applications ${applicationsRes.status}`)
         }
 
-        const formsData = await formsRes.json();
-        const applicationsData = await applicationsRes.json();
+        const formsData = await formsRes.json()
+        const applicationsData = await applicationsRes.json()
 
-        console.log("✅ Forms Data:", formsData);
-        console.log("✅ Applications Data:", applicationsData);
+        // Enhance forms with application counts
+        const enhancedForms = formsData.map((form: Form) => ({
+          ...form,
+          applicationsCount: applicationsData.filter((app: Application) => app.formId === form.id).length,
+        }))
 
-        setForms(formsData);
-        setApplications(applicationsData);
+        setForms(enhancedForms)
+        setApplications(applicationsData)
+
+        // Get 5 most recent applications
+        const sortedApplications = [...applicationsData]
+          .sort((a, b) => new Date(b.createdAt || "").getTime() - new Date(a.createdAt || "").getTime())
+          .slice(0, 5)
+
+        setRecentApplications(sortedApplications)
+
+        // Calculate stats
+        setStats({
+          totalForms: formsData.length,
+          activeForms: formsData.filter((form: Form) => form.active).length,
+          totalApplications: applicationsData.length,
+          pendingReviews: applicationsData.filter((app: Application) => app.status === "PENDING").length,
+          shortlisted: applicationsData.filter((app: Application) => app.status === "SHORTLISTED").length,
+          rejected: applicationsData.filter((app: Application) => app.status === "REJECTED").length,
+        })
       } catch (error) {
-        console.error("❌ Error fetching dashboard data:", error);
+        console.error("Error fetching dashboard data:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
-  const activeForms = forms.filter((form) => form.active).length;
-  const totalApplications = applications.length;
-  const pendingReviews = applications.filter(
-    (app) => app.status === "PENDING"
-  ).length;
+  // Filter forms based on search query
+  const filteredForms = forms.filter((form) => form.title.toLowerCase().includes(searchQuery.toLowerCase()))
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200">Pending</Badge>
+      case "REVIEWED":
+        return <Badge className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200 border-indigo-200">Reviewed</Badge>
+      case "SHORTLISTED":
+        return (
+          <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200">Shortlisted</Badge>
+        )
+      case "REJECTED":
+        return <Badge className="bg-rose-100 text-rose-800 hover:bg-rose-200 border-rose-200">Rejected</Badge>
+      default:
+        return <Badge variant="outline">Unknown</Badge>
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
-      <motion.div
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        variants={fadeIn}
-        className="max-w-7xl mx-auto"
-      >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
-          >
-            Admin Dashboard
-          </motion.h1>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => router.push("/admin/forms/create")}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <Plus className="h-5 w-5" />
-            Create New Form
-          </motion.button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <motion.div
-            variants={fadeIn}
-            transition={{ delay: 0.1 }}
-            className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl"
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <FileText className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-700">
-                  Active Forms
-                </h3>
-                <p className="text-3xl font-bold text-blue-600">
-                  {loading ? "..." : activeForms}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            variants={fadeIn}
-            transition={{ delay: 0.2 }}
-            className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl"
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <Users className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-700">
-                  Total Applications
-                </h3>
-                <p className="text-3xl font-bold text-green-600">
-                  {loading ? "..." : totalApplications}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            variants={fadeIn}
-            transition={{ delay: 0.3 }}
-            className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl"
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-700">
-                  Pending Review
-                </h3>
-                <p className="text-3xl font-bold text-yellow-600">
-                  {loading ? "..." : pendingReviews}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* <motion.div
-          variants={fadeIn}
-          transition={{ delay: 0.4 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden"
-        >
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-2xl font-semibold text-gray-800">Recent Forms</h2>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Talent Acquisition Dashboard</h1>
+            <p className="text-gray-500 mt-1">Welcome back! Here's an overview of your recruitment activities</p>
           </div>
-          
-          {loading ? (
-            <div className="p-6 flex justify-center">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full"
-              />
+
+          <Button
+            onClick={() => router.push("/admin/forms/create")}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Job Form
+          </Button>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-white border-indigo-100 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Active Job Forms</p>
+                  <p className="text-2xl font-bold text-gray-900">{loading ? "..." : stats.activeForms}</p>
+                </div>
+                <div className="h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-indigo-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border-teal-100 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Total Applications</p>
+                  <p className="text-2xl font-bold text-gray-900">{loading ? "..." : stats.totalApplications}</p>
+                </div>
+                <div className="h-12 w-12 bg-teal-100 rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-teal-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border-amber-100 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Pending Review</p>
+                  <p className="text-2xl font-bold text-gray-900">{loading ? "..." : stats.pendingReviews}</p>
+                </div>
+                <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-amber-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Shortlisted</p>
+                  <p className="text-2xl font-bold text-gray-900">{loading ? "..." : stats.shortlisted}</p>
+                </div>
+                <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-6 w-6 text-emerald-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Application Status Chart */}
+          <Card className="bg-white border-gray-200 shadow-sm lg:col-span-1">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-semibold text-gray-900">Application Status</CardTitle>
+              <CardDescription className="text-gray-500">Distribution of applications by status</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex justify-center items-center h-40">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-gray-700">Pending</span>
+                      <span className="text-gray-500">{stats.pendingReviews} applications</span>
+                    </div>
+                    <Progress
+                      value={(stats.pendingReviews / stats.totalApplications) * 100 || 0}
+                      max={100}
+                      className="h-2 bg-gray-100"
+                      indicatorclassname="bg-amber-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-gray-700">Reviewed</span>
+                      <span className="text-gray-500">
+                        {applications.filter((app) => app.status === "REVIEWED").length} applications
+                      </span>
+                    </div>
+                    <Progress
+                      value={
+                        (applications.filter((app) => app.status === "REVIEWED").length / stats.totalApplications) *
+                          100 || 0
+                      }
+                      max={100}
+                      className="h-2 bg-gray-100"
+                      indicatorclassname="bg-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-gray-700">Shortlisted</span>
+                      <span className="text-gray-500">{stats.shortlisted} applications</span>
+                    </div>
+                    <Progress
+                      value={(stats.shortlisted / stats.totalApplications) * 100 || 0}
+                      max={100}
+                      className="h-2 bg-gray-100"
+                      indicatorclassname="bg-emerald-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-gray-700">Rejected</span>
+                      <span className="text-gray-500">{stats.rejected} applications</span>
+                    </div>
+                    <Progress
+                      value={(stats.rejected / stats.totalApplications) * 100 || 0}
+                      max={100}
+                      className="h-2 bg-gray-100"
+                      indicatorclassname="bg-rose-500"
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="pt-0">
+              <Button
+                variant="outline"
+                className="w-full text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                onClick={() => router.push("/admin/applications")}
+              >
+                View All Applications
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </CardFooter>
+          </Card>
+
+          {/* Recent Applications */}
+          <Card className="bg-white border-gray-200 shadow-sm lg:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-semibold text-gray-900">Recent Applications</CardTitle>
+              <CardDescription className="text-gray-500">Latest candidates who applied</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex justify-center items-center h-40">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
+                </div>
+              ) : recentApplications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center text-center py-8">
+                  <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <Users className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">No applications yet</h3>
+                  <p className="text-gray-500 max-w-md">
+                    When candidates apply to your job postings, they'll appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader className="bg-gray-50">
+                      <TableRow>
+                        <TableHead className="font-semibold">Candidate</TableHead>
+                        <TableHead className="font-semibold">Job Form</TableHead>
+                        <TableHead className="font-semibold">Date</TableHead>
+                        <TableHead className="font-semibold">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentApplications.map((app) => (
+                        <TableRow key={app.id} className="hover:bg-gray-50 border-b border-gray-200">
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-semibold">
+                                {app.userId ? app.userId.charAt(0).toUpperCase() : "A"}
+                              </div>
+                              <span>{app.userId || "Anonymous Candidate"}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{forms.find((form) => form.id === app.formId)?.title || "Unknown Job"}</TableCell>
+                          <TableCell>
+                            {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "Unknown"}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(app.status)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="pt-0">
+              <Button
+                variant="outline"
+                className="w-full text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                onClick={() => router.push("/admin/applications")}
+              >
+                View All Applications
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+
+        {/* Job Forms List */}
+        <Card className="bg-white border-gray-200 shadow-sm">
+          <CardHeader className="pb-2">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg font-semibold text-gray-900">Job Forms</CardTitle>
+                <CardDescription className="text-gray-500">
+                  Manage your active and inactive job postings
+                </CardDescription>
+              </div>
+              <div className="relative w-full md:w-64">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                <Input
+                  placeholder="Search job forms..."
+                  className="pl-9 border-gray-300 bg-white h-10 focus-visible:ring-indigo-500"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
-          ) : forms.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">No forms created yet</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50/50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Title</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Created At</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {forms.map((form) => (
-                    <motion.tr
-                      key={form.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      whileHover={{ backgroundColor: "rgba(243, 244, 246, 0.4)" }}
-                      className="transition-colors duration-150"
-                    >
-                      <td className="px-6 py-4 text-gray-800">{form.title}</td>
-                      <td className="px-6 py-4 text-gray-600">
-                        {new Date(form.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                          form.active 
-                            ? "bg-green-100 text-green-700" 
-                            : "bg-gray-100 text-gray-700"
-                        }`}>
-                          {form.active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        */}
-        <motion.div
-          variants={fadeIn}
-          transition={{ delay: 0.4 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl overflow-hidden"
-        >
-          <FormsList />
-        </motion.div>
-      </motion.div>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex justify-center items-center h-40">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
+              </div>
+            ) : filteredForms.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center py-8">
+                <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <FileText className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-1">No job forms found</h3>
+                <p className="text-gray-500 max-w-md">
+                  {forms.length === 0
+                    ? "Create your first job form to start receiving applications."
+                    : "No job forms match your search criteria."}
+                </p>
+                {forms.length === 0 && (
+                  <Button
+                    onClick={() => router.push("/admin/forms/create")}
+                    className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Job Form
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-gray-50">
+                    <TableRow>
+                      <TableHead className="font-semibold">Job Title</TableHead>
+                      <TableHead className="font-semibold">Created</TableHead>
+                      <TableHead className="font-semibold">Applications</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="font-semibold text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredForms.map((form) => (
+                      <TableRow key={form.id} className="hover:bg-gray-50 border-b border-gray-200">
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center">
+                              <Briefcase className="h-5 w-5 text-indigo-600" />
+                            </div>
+                            <span className="text-gray-900">{form.title}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-gray-400" />
+                            <span>{new Date(form.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-gray-400" />
+                            <span>{form.applicationsCount || 0}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={`${
+                              form.active
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                                : "bg-gray-100 text-gray-800 border-gray-200"
+                            }`}
+                          >
+                            {form.active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                            onClick={() => router.push(`/admin/forms/${form.id}`)}
+                          >
+                            View Applications
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }
+
