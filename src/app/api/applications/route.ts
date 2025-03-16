@@ -2,106 +2,97 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { analyzeResumeWithGPT } from "../../../../lib/gpt"; // ✅ Import GPT-3 function
-import pdfParse from "pdf-parse";
+import { fetchAndParseResume } from "../../../../lib/resumeParsing";
 
 const prisma = new PrismaClient();
 
-export async function POST(request: Request) {
-  console.log("📥 Received POST request at /api/applications");
-  console.log("Request Method:", request.method);
+// ✅ Utility Function: Fetch Job Description
+async function getJobDescription(formId: string) {
+  const form = await prisma.jobForm.findUnique({
+    where: { id: formId },
+    select: { jobDescription: true },
+  });
 
+  if (!form) throw new Error("Job form not found");
+  return form.jobDescription;
+}
+
+// ✅ Utility Function: Store Application Before AI Call
+async function storeApplication(formId: string, responses: any, resumeUrl: string) {
+  return await prisma.application.create({
+    data: {
+      formId,
+      userId: null,
+      responses,
+      resumeUrl,
+      parsedResume: null,
+      matchScore: null,
+      matchReasoning: null,
+      status: "PENDING",
+    },
+  });
+}
+
+// ✅ Utility Function: Process Resume AI Analysis
+async function processResumeAI(applicationId: string, resumeUrl: string, jobDescription: string) {
   try {
-    const bodyText = await request.text();
-    console.log("📜 Raw Request Body:", bodyText);
+    console.log("📥 Fetching resume for AI analysis:", resumeUrl);
 
-    if (!bodyText) {
-      console.error("❌ Request body is missing");
-      return NextResponse.json({ error: "Empty request body" }, { status: 400 });
-    }
+    // ✅ Fetch & Parse Resume Text
+    const resumeText = await fetchAndParseResume(resumeUrl);
+    // console.log("✅ Extracted Resume Text:", resumeText.substring(0, 500));
 
-    const body = JSON.parse(bodyText);
-    console.log("📩 Parsed Request Body:", body);
+    console.log("🔍 Calling AI to analyze resume...");
+    const analysis = await analyzeResumeWithGPT(resumeText, jobDescription);
+    // Simulating AI response (for debugging)
+    // const analysis = { matchScore: 85, reasoning: "Good alignment with job requirements" };
 
-    const { formId, responses, resumeUrl } = body;
-
-    if (!formId || !responses || !resumeUrl) {
-      console.error("❌ Missing required fields in request");
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    console.log("📢 Fetching job form details for formId:", formId);
-
-    // ✅ Step 1: Fetch Job Description
-    const form = await prisma.jobForm.findUnique({
-      where: { id: formId },
-      select: { jobDescription: true },
-    });
-
-    if (!form) {
-      console.error("❌ Job form not found for formId:", formId);
-      return NextResponse.json({ error: "Job form not found" }, { status: 404 });
-    }
-
-    // ✅ Step 2: Store Application in Database Before AI Call
-    const newApplication = await prisma.application.create({
+    console.log("✅ AI Analysis Successful:", analysis);
+    // ✅ Update Application with AI match score & reasoning
+    await prisma.application.update({
+      where: { id: applicationId },
       data: {
-        formId,
-        userId: null,
-        responses,
-        resumeUrl,
-        parsedResume: null,
-        matchScore: null,
-        matchReasoning: null,
-        status: "PENDING",
+        parsedResume: { text: resumeText },
+        matchScore: analysis.matchScore,
+        matchReasoning: analysis.reasoning,
       },
     });
 
+    console.log("✅ AI Analysis Saved to DB");
+  } catch (error) {
+    console.error("❌ AI Processing Failed:", error);
+  }
+}
+
+// ✅ API Route: Handle Application Submission
+export async function POST(request: Request) {
+  console.log("📥 Received POST request at /api/applications");
+
+  try {
+    const body = await request.json(); // Auto JSON parsing
+    const { formId, responses, resumeUrl } = body;
+
+    if (!formId || !responses || !resumeUrl) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    console.log("📢 Fetching job description for formId:", formId);
+    const jobDescription = await getJobDescription(formId);
+
+    console.log("📂 Storing application...");
+    const newApplication = await storeApplication(formId, responses, resumeUrl);
     console.log("✅ Application Created:", newApplication);
 
-    // ✅ Step 3: Process AI in Background (No Blocking)
-    (async () => {
-      try {
-        console.log("🔄 Downloading resume from S3:", resumeUrl);
-        const response = await fetch(resumeUrl);
-        if (!response.ok) throw new Error("Failed to download resume");
-
-        const resumeBuffer = await response.arrayBuffer();
-        // const resumeText = await pdfParse(Buffer.from(resumeBuffer)).then((data) => data.text);
-        const resumeText = "TEST resume text";
-
-        console.log("✅ Extracted Resume Text:", resumeText.slice(0, 500));
-
-        console.log("🔍 Calling GPT-3 AI to analyze resume...");
-        const analysis = await analyzeResumeWithGPT(resumeText, form.jobDescription);
-
-        if (!analysis || typeof analysis.matchScore !== "number") {
-          throw new Error("Invalid AI response format");
-        }
-
-        console.log("✅ GPT-3 AI Returned Analysis:", analysis);
-
-        // ✅ Step 5: Update Application with AI match score & reasoning
-        await prisma.application.update({
-          where: { id: newApplication.id },
-          data: {
-            parsedResume: { text: resumeText },
-            matchScore: analysis.matchScore,
-            matchReasoning: analysis.reasoning,
-          },
-        });
-
-        console.log("✅ GPT-3 Analysis Saved to DB");
-      } catch (aiError) {
-        console.error("❌ AI Processing Failed:", aiError);
-      }
-    })();
+    // ✅ AI Processing in Background
+    processResumeAI(newApplication.id, resumeUrl, jobDescription);
 
     return NextResponse.json(newApplication, { status: 201 });
   } catch (error) {
     console.error("❌ Error submitting application:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
   }
 }
+
 
 // ✅ GET Handler: Fetch applications for a specific form
 export async function GET(request: Request) {
