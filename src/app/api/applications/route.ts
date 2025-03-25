@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     console.log("✅ Application Created:", newApplication);
 
     // ✅ AI Processing in Background
-    processResumeAI(newApplication.id, resumeUrl, jobDescription);
+    await processResumeAI(newApplication.id, resumeUrl, jobDescription);
 
     return NextResponse.json(newApplication, { status: 201 });
   } catch (error) {
