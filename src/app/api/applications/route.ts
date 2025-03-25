@@ -81,12 +81,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    console.log("📢 Fetching job description for formId:", formId);
-    const jobDescription = await getJobDescription(formId);
+    // console.log("📢 Fetching job description for formId:", formId);
+    // const jobDescription = await getJobDescription(formId);
 
-    console.log("📂 Storing application...");
-    const newApplication = await storeApplication(formId, responses, resumeUrl);
-    console.log("✅ Application Created:", newApplication);
+    // console.log("📂 Storing application...");
+    // const newApplication = await storeApplication(formId, responses, resumeUrl);
+    // console.log("✅ Application Created:", newApplication);
 
     // ✅ AI Processing in Background
     fetch(process.env.LAMBDA_TRIGGER_URL!, {
@@ -94,10 +94,10 @@ export async function POST(request: Request) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ applicationId: newApplication.id, resumeUrl, jobDescription }),
+      body: JSON.stringify({ formId, responses, resumeUrl }),
     });
 
-    return NextResponse.json(newApplication, { status: 201 });
+    return NextResponse.json({ status: 201 });
   } catch (error) {
     console.error("❌ Error submitting application:", error);
     return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
