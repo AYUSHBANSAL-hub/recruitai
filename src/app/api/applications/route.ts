@@ -89,7 +89,13 @@ export async function POST(request: Request) {
     console.log("✅ Application Created:", newApplication);
 
     // ✅ AI Processing in Background
-    await processResumeAI(newApplication.id, resumeUrl, jobDescription);
+    fetch(process.env.LAMBDA_TRIGGER_URL!, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ applicationId: newApplication.id, resumeUrl, jobDescription }),
+    });
 
     return NextResponse.json(newApplication, { status: 201 });
   } catch (error) {
