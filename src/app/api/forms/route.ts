@@ -21,9 +21,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Admins only' }, { status: 403 });
     }
 
-    const { title, jobDescription, fields } = await request.json();
+    const { title, jobDescription, fields, hiringDomain } = await request.json();
 
-    if (!title || !jobDescription || !fields.length) {
+    if (!title || !jobDescription || !fields.length || !hiringDomain) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -34,6 +34,7 @@ export async function POST(request: Request) {
         fields,
         userId: session.userId, // ✅ Ensure this is saved correctly
         active: true,
+        hiringDomain,
       },
     });
     
