@@ -316,7 +316,7 @@ export default function CreateForm() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Failed to create form")
 
-      router.push("/admin/forms")
+      router.push("/admin")
     } catch (err: any) {
       setError(err.message)
       setIsSubmitting(false)
@@ -588,8 +588,8 @@ export default function CreateForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center mb-6">
           <Button variant="ghost" onClick={() => router.back()} className="mr-4">
             <ArrowLeft className="h-4 w-4 mr-2" />

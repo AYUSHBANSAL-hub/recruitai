@@ -239,20 +239,20 @@ function ApplicationsList() {
 
   const getNameFromResponses = (app: Application) => {
     // Try to extract name from responses
-    const nameFields = ["name", "fullName", "candidateName", "full_name"]
+    const nameFields = ["name", "fullName", "candidateName", "full_name", "fixed-name"]
     for (const field of nameFields) {
       if (app.responses[field]) return app.responses[field]
     }
-    return app.userId || "Anonymous Candidate"
+    return app.responses && app.responses["fixed-name"] || "Anonymous Candidate"
   }
 
   const getEmailFromResponses = (app: Application) => {
     // Try to extract email from responses
-    const emailFields = ["email", "emailAddress", "candidate_email"]
+    const emailFields = ["email", "emailAddress", "candidate_email", "fixed-email"]
     for (const field of emailFields) {
       if (app.responses[field]) return app.responses[field]
     }
-    return "No email provided"
+    return app.responses && app.responses["fixed-email"] || "No email provided"
   }
 
   return (
@@ -513,7 +513,7 @@ function ApplicationsList() {
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Email</p>
-                          <p className="font-medium">{getEmailFromResponses(selectedApp)}</p>
+                          <p className="font-medium break-words">{getEmailFromResponses(selectedApp)}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Status</p>
