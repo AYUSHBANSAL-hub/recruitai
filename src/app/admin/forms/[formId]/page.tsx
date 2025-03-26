@@ -1,176 +1,244 @@
-"use client"
+"use client";
 
-import React from "react"
+import React from "react";
 
-import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { Search, ChevronUp, ChevronDown, Info, FileText, User, Award, AlertTriangle, MessageSquare } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Progress } from "@/components/ui/progress"
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import {
+  Search,
+  ChevronUp,
+  ChevronDown,
+  Info,
+  FileText,
+  User,
+  Award,
+  AlertTriangle,
+  MessageSquare,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Progress } from "@/components/ui/progress";
+import CalendarIntegration from "@/components/CalendarIntegration"
 
 interface Application {
-  id: string
-  userId?: string | null
-  responses: { [key: string]: string }
-  resumeUrl: string
-  status: "PENDING" | "REVIEWED" | "SHORTLISTED" | "REJECTED"
-  matchScore?: number | null // ✅ AI-generated match score (0-100)
-  matchReasoning?: string | null // ✅ AI's reasoning for the match
-  strengths:string[],
-  weaknesses:string[],
+  id: string;
+  userId?: string | null;
+  responses: { [key: string]: string };
+  resumeUrl: string;
+  status: "PENDING" | "REVIEWED" | "SHORTLISTED" | "REJECTED";
+  matchScore?: number | null; // ✅ AI-generated match score (0-100)
+  matchReasoning?: string | null; // ✅ AI's reasoning for the match
+  strengths: string[];
+  weaknesses: string[];
   parsedResume?: {
-    strengths?: string[] // ✅ Key strengths identified by AI
-    weaknesses?: string[] // ✅ Weaknesses or missing skills
-  } | null
+    strengths?: string[]; // ✅ Key strengths identified by AI
+    weaknesses?: string[]; // ✅ Weaknesses or missing skills
+  } | null;
 }
 
 export default function ApplicationsList() {
-  const router = useRouter()
-  const { formId } = useParams()
+  const router = useRouter();
+  const { formId } = useParams();
 
-  const [applications, setApplications] = useState<Application[]>([])
-  const [filteredApplications, setFilteredApplications] = useState<Application[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<
+    Application[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // New state variables for search, sorting, and filtering
-  const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState<"matchScore" | "">("")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-  const [statusFilter, setStatusFilter] = useState<Application["status"] | "ALL">("ALL")
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
-  const [activeTab, setActiveTab] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"matchScore" | "">("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [statusFilter, setStatusFilter] = useState<
+    Application["status"] | "ALL"
+  >("ALL");
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState<string>("all");
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await fetch(`/api/applications?formId=${formId}`)
-        if (!res.ok) throw new Error("Failed to fetch applications")
+        const res = await fetch(`/api/applications?formId=${formId}`);
+        if (!res.ok) throw new Error("Failed to fetch applications");
 
-        const data = await res.json()
-        setApplications(data)
-        setFilteredApplications(data)
+        const data = await res.json();
+        setApplications(data);
+        setFilteredApplications(data);
       } catch (err: any) {
-        setError(err.message)
+        setError(err.message);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchApplications()
-  }, [formId])
+    fetchApplications();
+  }, [formId]);
 
   // Apply filters and sorting whenever dependencies change
   useEffect(() => {
-    let result = [...applications]
+    let result = [...applications];
 
     // Apply status filter based on tab or dropdown
     if (activeTab !== "all") {
-      result = result.filter((app) => app.status === activeTab.toUpperCase())
+      result = result.filter((app) => app.status === activeTab.toUpperCase());
     } else if (statusFilter !== "ALL") {
-      result = result.filter((app) => app.status === statusFilter)
+      result = result.filter((app) => app.status === statusFilter);
     }
 
     // Apply search filter
     if (searchQuery) {
-      const query = searchQuery.toLowerCase()
+      const query = searchQuery.toLowerCase();
       result = result.filter(
         (app) =>
           app.userId?.toLowerCase().includes(query) ||
           false ||
-          Object.values(app.responses).some((response) => response.toLowerCase().includes(query)),
-      )
+          Object.values(app.responses).some((response) =>
+            response.toLowerCase().includes(query)
+          )
+      );
     }
 
     // Apply sorting
     if (sortBy === "matchScore") {
       result.sort((a, b) => {
-        const scoreA = a.matchScore ?? -1
-        const scoreB = b.matchScore ?? -1
+        const scoreA = a.matchScore ?? -1;
+        const scoreB = b.matchScore ?? -1;
 
-        return sortDirection === "asc" ? scoreA - scoreB : scoreB - scoreA
-      })
+        return sortDirection === "asc" ? scoreA - scoreB : scoreB - scoreA;
+      });
     }
 
-    setFilteredApplications(result)
-  }, [applications, searchQuery, sortBy, sortDirection, statusFilter, activeTab])
+    setFilteredApplications(result);
+  }, [
+    applications,
+    searchQuery,
+    sortBy,
+    sortDirection,
+    statusFilter,
+    activeTab,
+  ]);
 
-  const updateStatus = async (appId: string, newStatus: Application["status"]) => {
+  const updateStatus = async (
+    appId: string,
+    newStatus: Application["status"]
+  ) => {
     try {
       const res = await fetch(`/api/applications/${appId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
-      })
+      });
 
-      if (!res.ok) throw new Error("Failed to update status")
+      if (!res.ok) throw new Error("Failed to update status");
 
-      setApplications(applications.map((app) => (app.id === appId ? { ...app, status: newStatus } : app)))
+      setApplications(
+        applications.map((app) =>
+          app.id === appId ? { ...app, status: newStatus } : app
+        )
+      );
     } catch (err: any) {
-      console.error("Error updating status:", err)
+      console.error("Error updating status:", err);
     }
-  }
+  };
 
   const toggleSort = () => {
     if (sortBy !== "matchScore") {
-      setSortBy("matchScore")
-      setSortDirection("desc")
+      setSortBy("matchScore");
+      setSortDirection("desc");
     } else {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     }
-  }
+  };
 
   const toggleRowExpansion = (appId: string) => {
     setExpandedRows((prev) => ({
       ...prev,
       [appId]: !prev[appId],
-    }))
-  }
+    }));
+  };
 
   const getStatusBadge = (status: Application["status"]) => {
     switch (status) {
       case "PENDING":
-        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200">Pending</Badge>
+        return (
+          <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200">
+            Pending
+          </Badge>
+        );
       case "REVIEWED":
-        return <Badge className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200 border-indigo-200">Reviewed</Badge>
+        return (
+          <Badge className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200 border-indigo-200">
+            Reviewed
+          </Badge>
+        );
       case "SHORTLISTED":
         return (
-          <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200">Shortlisted</Badge>
-        )
+          <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200">
+            Shortlisted
+          </Badge>
+        );
       case "REJECTED":
-        return <Badge className="bg-rose-100 text-rose-800 hover:bg-rose-200 border-rose-200">Rejected</Badge>
+        return (
+          <Badge className="bg-rose-100 text-rose-800 hover:bg-rose-200 border-rose-200">
+            Rejected
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">Unknown</Badge>
+        return <Badge variant="outline">Unknown</Badge>;
     }
-  }
+  };
 
   const getScoreColor = (score: number | null | undefined) => {
-    if (score === null || score === undefined) return "text-gray-400"
-    if (score >= 80) return "text-emerald-600"
-    if (score >= 60) return "text-teal-600"
-    if (score >= 40) return "text-amber-600"
-    return "text-rose-600"
-  }
+    if (score === null || score === undefined) return "text-gray-400";
+    if (score >= 80) return "text-emerald-600";
+    if (score >= 60) return "text-teal-600";
+    if (score >= 40) return "text-amber-600";
+    return "text-rose-600";
+  };
 
   const getScoreProgressColor = (score: number | null | undefined) => {
-    if (score === null || score === undefined) return "bg-gray-200"
-    if (score >= 80) return "bg-emerald-500"
-    if (score >= 60) return "bg-teal-500"
-    if (score >= 40) return "bg-amber-500"
-    return "bg-rose-500"
-  }
+    if (score === null || score === undefined) return "bg-gray-200";
+    if (score >= 80) return "bg-emerald-500";
+    if (score >= 60) return "bg-teal-500";
+    if (score >= 40) return "bg-amber-500";
+    return "bg-rose-500";
+  };
 
   const countByStatus = (status: Application["status"]) => {
-    return applications.filter((app) => app.status === status).length
-  }
+    return applications.filter((app) => app.status === status).length;
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 text-gray-800 bg-gray-50 min-h-screen">
@@ -178,8 +246,12 @@ export default function ApplicationsList() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Talent Acquisition</h1>
-            <p className="text-gray-500 mt-1">Review and manage candidate applications</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Talent Acquisition
+            </h1>
+            <p className="text-gray-500 mt-1">
+              Review and manage candidate applications
+            </p>
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
@@ -195,8 +267,8 @@ export default function ApplicationsList() {
             <Select
               value={statusFilter}
               onValueChange={(value) => {
-                setStatusFilter(value as Application["status"] | "ALL")
-                setActiveTab("all")
+                setStatusFilter(value as Application["status"] | "ALL");
+                setActiveTab("all");
               }}
             >
               <SelectTrigger className="w-full md:w-40 border-gray-300 bg-white h-10 focus:ring-indigo-500">
@@ -219,8 +291,12 @@ export default function ApplicationsList() {
             <CardContent className="p-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Total Applications</p>
-                  <p className="text-2xl font-bold text-gray-900">{applications.length}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Applications
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {applications.length}
+                  </p>
                 </div>
                 <div className="h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center">
                   <FileText className="h-6 w-6 text-indigo-600" />
@@ -233,8 +309,12 @@ export default function ApplicationsList() {
             <CardContent className="p-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Shortlisted</p>
-                  <p className="text-2xl font-bold text-gray-900">{countByStatus("SHORTLISTED")}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Shortlisted
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {countByStatus("SHORTLISTED")}
+                  </p>
                 </div>
                 <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center">
                   <Award className="h-6 w-6 text-emerald-600" />
@@ -247,8 +327,12 @@ export default function ApplicationsList() {
             <CardContent className="p-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Pending Review</p>
-                  <p className="text-2xl font-bold text-gray-900">{countByStatus("PENDING")}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Pending Review
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {countByStatus("PENDING")}
+                  </p>
                 </div>
                 <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center">
                   <AlertTriangle className="h-6 w-6 text-amber-600" />
@@ -262,7 +346,9 @@ export default function ApplicationsList() {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium text-gray-500">Rejected</p>
-                  <p className="text-2xl font-bold text-gray-900">{countByStatus("REJECTED")}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {countByStatus("REJECTED")}
+                  </p>
                 </div>
                 <div className="h-12 w-12 bg-rose-100 rounded-full flex items-center justify-center">
                   <User className="h-6 w-6 text-rose-600" />
@@ -277,8 +363,8 @@ export default function ApplicationsList() {
           defaultValue="all"
           value={activeTab}
           onValueChange={(value) => {
-            setActiveTab(value)
-            setStatusFilter("ALL")
+            setActiveTab(value);
+            setStatusFilter("ALL");
           }}
           className="w-full"
         >
@@ -321,7 +407,9 @@ export default function ApplicationsList() {
                 <CardContent className="flex justify-center items-center h-60">
                   <div className="flex flex-col items-center gap-3">
                     <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-                    <p className="text-gray-600 font-medium">Loading applications...</p>
+                    <p className="text-gray-600 font-medium">
+                      Loading applications...
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -341,10 +429,12 @@ export default function ApplicationsList() {
                     <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                       <FileText className="h-8 w-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-1">No applications found</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-1">
+                      No applications found
+                    </h3>
                     <p className="text-gray-500 max-w-md">
-                      No applications match your current filters. Try adjusting your search criteria or check back
-                      later.
+                      No applications match your current filters. Try adjusting
+                      your search criteria or check back later.
                     </p>
                   </div>
                 </CardContent>
@@ -355,9 +445,14 @@ export default function ApplicationsList() {
                   <Table>
                     <TableHeader className="bg-gray-50">
                       <TableRow>
-                        <TableHead className="w-[200px] font-semibold">Candidate</TableHead>
+                        <TableHead className="w-[200px] font-semibold">
+                          Candidate
+                        </TableHead>
                         <TableHead className="font-semibold">Resume</TableHead>
-                        <TableHead className="cursor-pointer font-semibold" onClick={toggleSort}>
+                        <TableHead
+                          className="cursor-pointer font-semibold"
+                          onClick={toggleSort}
+                        >
                           <div className="flex items-center gap-1">
                             Match Score
                             {sortBy === "matchScore" &&
@@ -368,7 +463,9 @@ export default function ApplicationsList() {
                               ))}
                           </div>
                         </TableHead>
-                        <TableHead className="font-semibold">AI Insights</TableHead>
+                        <TableHead className="font-semibold">
+                          AI Insights
+                        </TableHead>
                         <TableHead className="font-semibold">Status</TableHead>
                         <TableHead className="font-semibold">Actions</TableHead>
                       </TableRow>
@@ -380,11 +477,22 @@ export default function ApplicationsList() {
                             <TableCell className="font-medium">
                               <div className="flex items-center gap-3">
                                 <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-semibold">
-                                  {app.responses ? app.responses["fixed-name"].charAt(0).toUpperCase() : "A"}
+                                  {app.responses
+                                    ? app.responses["fixed-name"]
+                                        .charAt(0)
+                                        .toUpperCase()
+                                    : "A"}
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-900">{app.responses ? app.responses["fixed-name"] || "Anonymous Candidate" : "Anonymous Candidate"}</p>
-                                  <p className="text-xs text-gray-500">Applied {new Date().toLocaleDateString()}</p>
+                                  <p className="font-medium text-gray-900">
+                                    {app.responses
+                                      ? app.responses["fixed-name"] ||
+                                        "Anonymous Candidate"
+                                      : "Anonymous Candidate"}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    Applied {new Date().toLocaleDateString()}
+                                  </p>
                                 </div>
                               </div>
                             </TableCell>
@@ -405,8 +513,14 @@ export default function ApplicationsList() {
                                   <TooltipTrigger asChild>
                                     <div className="space-y-1.5">
                                       <div className="flex items-center gap-2">
-                                        <span className={`font-semibold ${getScoreColor(app.matchScore)}`}>
-                                          {app.matchScore !== null ? `${app.matchScore}%` : "N/A"}
+                                        <span
+                                          className={`font-semibold ${getScoreColor(
+                                            app.matchScore
+                                          )}`}
+                                        >
+                                          {app.matchScore !== null
+                                            ? `${app.matchScore}%`
+                                            : "N/A"}
                                         </span>
                                         <Info className="h-4 w-4 text-gray-400" />
                                       </div>
@@ -414,7 +528,9 @@ export default function ApplicationsList() {
                                         value={app.matchScore || 0}
                                         max={100}
                                         className="h-2 w-24 bg-gray-100"
-                                        indicatorclassname={getScoreProgressColor(app.matchScore)}
+                                        indicatorclassname={getScoreProgressColor(
+                                          app.matchScore
+                                        )}
                                       />
                                     </div>
                                   </TooltipTrigger>
@@ -423,12 +539,12 @@ export default function ApplicationsList() {
                                       {app.matchScore && app.matchScore > 80
                                         ? "Excellent match for the position"
                                         : app.matchScore && app.matchScore > 60
-                                          ? "Strong match for the position"
-                                          : app.matchScore && app.matchScore > 40
-                                            ? "Moderate match for the position"
-                                            : app.matchScore !== null
-                                              ? "Low match for the position"
-                                              : "No match score available"}
+                                        ? "Strong match for the position"
+                                        : app.matchScore && app.matchScore > 40
+                                        ? "Moderate match for the position"
+                                        : app.matchScore !== null
+                                        ? "Low match for the position"
+                                        : "No match score available"}
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
@@ -444,7 +560,9 @@ export default function ApplicationsList() {
                                 }`}
                               >
                                 <MessageSquare className="h-4 w-4 mr-1" />
-                                {expandedRows[app.id] ? "Hide Details" : "View Details"}
+                                {expandedRows[app.id]
+                                  ? "Hide Details"
+                                  : "View Details"}
                               </Button>
                             </TableCell>
                             <TableCell>{getStatusBadge(app.status)}</TableCell>
@@ -464,21 +582,27 @@ export default function ApplicationsList() {
                                   className="bg-white border border-gray-200 shadow-lg rounded-lg p-1"
                                 >
                                   <DropdownMenuItem
-                                    onClick={() => updateStatus(app.id, "REVIEWED")}
+                                    onClick={() =>
+                                      updateStatus(app.id, "REVIEWED")
+                                    }
                                     className="cursor-pointer hover:bg-indigo-50 hover:text-indigo-700"
                                     disabled={app.status === "REVIEWED"}
                                   >
                                     Mark as Reviewed
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => updateStatus(app.id, "SHORTLISTED")}
+                                    onClick={() =>
+                                      updateStatus(app.id, "SHORTLISTED")
+                                    }
                                     className="cursor-pointer hover:bg-emerald-50 hover:text-emerald-700"
                                     disabled={app.status === "SHORTLISTED"}
                                   >
                                     Shortlist Candidate
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => updateStatus(app.id, "REJECTED")}
+                                    onClick={() =>
+                                      updateStatus(app.id, "REJECTED")
+                                    }
                                     className="cursor-pointer hover:bg-rose-50 hover:text-rose-700"
                                     disabled={app.status === "REJECTED"}
                                   >
@@ -505,17 +629,28 @@ export default function ApplicationsList() {
                                       <CardContent className="p-4">
                                         {app.strengths?.length ? (
                                           <ul className="space-y-2">
-                                            {app.strengths.map((strength, idx) => (
-                                              <li key={idx} className="flex items-start gap-2">
-                                                <div className="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                  <span className="text-xs text-emerald-700 font-medium">✓</span>
-                                                </div>
-                                                <span className="text-sm text-gray-700">{strength}</span>
-                                              </li>
-                                            ))}
+                                            {app.strengths.map(
+                                              (strength, idx) => (
+                                                <li
+                                                  key={idx}
+                                                  className="flex items-start gap-2"
+                                                >
+                                                  <div className="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                    <span className="text-xs text-emerald-700 font-medium">
+                                                      ✓
+                                                    </span>
+                                                  </div>
+                                                  <span className="text-sm text-gray-700">
+                                                    {strength}
+                                                  </span>
+                                                </li>
+                                              )
+                                            )}
                                           </ul>
                                         ) : (
-                                          <p className="text-sm text-gray-500 italic">No strengths identified</p>
+                                          <p className="text-sm text-gray-500 italic">
+                                            No strengths identified
+                                          </p>
                                         )}
                                       </CardContent>
                                     </Card>
@@ -531,14 +666,23 @@ export default function ApplicationsList() {
                                       <CardContent className="p-4">
                                         {app.weaknesses?.length ? (
                                           <ul className="space-y-2">
-                                            {app.weaknesses.map((weakness, idx) => (
-                                              <li key={idx} className="flex items-start gap-2">
-                                                <div className="h-5 w-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                  <span className="text-xs text-amber-700 font-medium">!</span>
-                                                </div>
-                                                <span className="text-sm text-gray-700">{weakness}</span>
-                                              </li>
-                                            ))}
+                                            {app.weaknesses.map(
+                                              (weakness, idx) => (
+                                                <li
+                                                  key={idx}
+                                                  className="flex items-start gap-2"
+                                                >
+                                                  <div className="h-5 w-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                    <span className="text-xs text-amber-700 font-medium">
+                                                      !
+                                                    </span>
+                                                  </div>
+                                                  <span className="text-sm text-gray-700">
+                                                    {weakness}
+                                                  </span>
+                                                </li>
+                                              )
+                                            )}
                                           </ul>
                                         ) : (
                                           <p className="text-sm text-gray-500 italic">
@@ -559,10 +703,35 @@ export default function ApplicationsList() {
                                     </CardHeader>
                                     <CardContent className="p-4">
                                       <p className="text-sm text-gray-700 leading-relaxed">
-                                        {app.matchReasoning || "No detailed analysis available for this candidate."}
+                                        {app.matchReasoning ||
+                                          "No detailed analysis available for this candidate."}
                                       </p>
                                     </CardContent>
                                   </Card>
+                                  {app &&
+                                    app.status === "SHORTLISTED" &&
+                                    (
+                                      <div className="mt-4">
+                                        <CalendarIntegration
+                                          candidateName={
+                                            app.responses
+                                              ? app.responses["fixed-name"] ||
+                                                "Anonymous Candidate"
+                                              : "Anonymous Candidate"
+                                          }
+                                          candidateEmail={
+                                            app.responses
+                                              ? app.responses["fixed-email"] ||
+                                                ""
+                                              : ""
+                                          }
+                                          jobTitle={
+                                             "Unknown Position"
+                                          }
+                                          provider="cal"
+                                        />
+                                      </div>
+                                    )}
                                 </div>
                               </TableCell>
                             </TableRow>
@@ -578,6 +747,5 @@ export default function ApplicationsList() {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }
-
