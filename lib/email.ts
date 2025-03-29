@@ -15,6 +15,51 @@ interface EmailTemplate {
   subject: string
   html: string
 }
+const welcomeEmailTemplates: Record<
+  string,
+  (name: string) => EmailTemplate
+> = {
+  welcome: (name) => ({
+    subject: `Welcome to Recruit AI`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to Recruit AI</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #4F46E5; padding: 20px; text-align: center; }
+          .header h1 { color: white; margin: 0; font-size: 24px; }
+          .content { padding: 20px; background-color: #f9fafb; }
+          .footer { background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #6b7280; }
+          .button { display: inline-block; background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Recruit AI</h1>
+          </div>
+          <div class="content">
+            <h2>Hello ${name},</h2>
+            <p>Welcome to Recruit AI! We're excited to have you on board.</p>
+            <p>We're here to help you find your dream job and make the hiring process as smooth as possible.</p>
+            <p>If you have any questions, please don't hesitate to contact our support team.</p>
+            <p>Best regards,<br/>Recruit AI Team</p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} Recruit AI. All rights reserved.</p>
+            <p>This is an automated message, please do not reply to this email.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  }),
+}
 
 const statusEmailTemplates: Record<
   string,
@@ -224,3 +269,89 @@ export async function sendStatusUpdateEmail(
   }
 }
 
+export async function sendWelcomeEmail(email: string, name?: string) {
+  const template = welcomeEmailTemplates.welcome(name || "User")
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to: email,
+      ...template,
+    })
+    console.log(`Welcome email sent to ${email}`)
+    return { success: true }
+  } catch (error) {
+    console.error("Error sending welcome email:", error)
+    throw error
+  }
+}
+
+const applicationSubmittedEmailTemplate: Record<
+  string,
+  (name: string, jobTitle: string) => EmailTemplate
+> = {
+  submitted: (name, jobTitle) => ({
+    subject: `Application Submitted for ${jobTitle} | Recruit AI`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Application Update</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #4F46E5; padding: 20px; text-align: center; }
+          .header h1 { color: white; margin: 0; font-size: 24px; }
+          .content { padding: 20px; background-color: #f9fafb; }
+          .footer { background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #6b7280; }
+          .button { display: inline-block; background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+          .info-box { background-color: #e0e7ff; border-left: 4px solid #4F46E5; padding: 10px 15px; margin: 15px 0; }
+          .resources { background-color: #f3f4f6; padding: 15px; border-radius: 4px; margin: 20px 0; }
+          .resources h3 { margin-top: 0; color: #4F46E5; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Recruit AI</h1>
+          </div>
+          <div class="content">
+            <h2>Hi ${name},</h2>
+            <p>Thanks for applying to <strong>${jobTitle}</strong>!. There are a ton of great companies out there, so we appreciate your interest in joining our team.</p>
+            
+            <p>While we’re not able to reach out to every applicant, our recruiting team will contact you if your skills and experience are a strong match for the role. In the meantime, join the conversation about job opportunities and life at ${jobTitle} on our LinkedIn page..</p>
+            <p>We appreciate your interest in joining our team and wish you success in your job search and professional endeavors.</p>
+            
+            <p>Best regards,<br/>Recruit AI Team</p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} Recruit AI. All rights reserved.</p>
+            <p>This is an automated message, please do not reply to this email.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  }),
+}
+
+export async function sendApplicationSubmittedEmail(
+  email: string,
+  name: string,
+  jobTitle: string
+) {
+  const template = applicationSubmittedEmailTemplate.submitted(name, jobTitle)
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to: email,
+      ...template,
+    })
+    console.log(`Application submitted email sent to ${email}`)
+    return { success: true }
+  } catch (error) {
+    console.error("Error sending application submitted email:", error)
+    throw error
+  }
+}

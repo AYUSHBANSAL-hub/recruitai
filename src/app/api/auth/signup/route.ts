@@ -21,7 +21,15 @@ export async function POST(request: Request) {
       recruitmentChallenges,
       acceptTerms,
     } = await request.json()
+    if(!email || !password || !firstName || !lastName || !phoneNumber || !companyName || !companyWebsite || !industry || !companySize || !jobTitle || !department || !recruitmentChallenges || !acceptTerms) {
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    // Validate email format
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    }
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },

@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { analyzeResumeWithGPT } from "../../../../lib/gpt"; // ✅ Import GPT-3 function
 import { fetchAndParseResume } from "../../../../lib/resumeParsing";
 import { analyzeResumeWithGemini } from "../../../../lib/openRouter";
+import { sendApplicationSubmittedEmail } from "../../../../lib/email";
 
 const prisma = new PrismaClient();
 
@@ -75,9 +76,9 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json(); // Auto JSON parsing
-    const { formId, responses, resumeUrl } = body;
+    const { formId, responses, resumeUrl, formTitle } = body;
 
-    if (!formId || !responses || !resumeUrl) {
+    if (!formId || !responses || !resumeUrl || !formTitle) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -96,6 +97,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({ formId, responses, resumeUrl }),
     });
+    await sendApplicationSubmittedEmail(responses["fixed-email"], responses["fixed-name"], formTitle);
 
     return NextResponse.json({ status: 201 });
   } catch (error) {
@@ -120,15 +122,21 @@ export async function GET(request: Request) {
       applications = await prisma.application.findMany({
         where: { formId },
         orderBy: { createdAt: "desc" },
+        include: {
+          form: true, // Fetch job details along with applications
+        },
       });
     } else {
       console.log("📊 Fetching all applications...");
       applications = await prisma.application.findMany({
         orderBy: { createdAt: "desc" },
+        include: {
+          form: true, // Fetch job details for all applications
+        },
       });
     }
 
-    console.log("✅ Applications Retrieved:", applications.length);
+    console.log("✅ Applications Retrieved:", applications);
     return NextResponse.json(applications, { status: 200 });
   } catch (error) {
     console.error("❌ Error fetching applications:", error);

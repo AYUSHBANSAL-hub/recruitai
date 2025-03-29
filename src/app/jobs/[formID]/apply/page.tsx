@@ -37,6 +37,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { sendApplicationSubmittedEmail } from "../../../../../lib/email";
 
 interface Form {
   id: string;
@@ -66,12 +67,21 @@ export default function ApplyForm() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [success, setSuccess] = useState(false);
+  const [submittedStatus, setSubmittedStatus] = useState(false);
 
   useEffect(() => {
     if (params) {
       setFormId(params.formID);
     }
   }, [params]);
+  useEffect(()=>{
+    const savedFormId = localStorage.getItem("savedFormId");
+    console.log("savedFormId", savedFormId);
+    console.log("formId", formId);
+    if (savedFormId === formId) {
+      setSubmittedStatus(true);
+    }
+  }, [formId]);
 
   useEffect(() => {
     if (!formId) return;
@@ -209,7 +219,6 @@ export default function ApplyForm() {
     setFormErrors(errors);
     return isValid;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("handle submit called");
@@ -234,8 +243,8 @@ export default function ApplyForm() {
       if (resume) {
         resumeUrl = await uploadFileToS3(resume);
       }
-
-      const applicationData = { formId, responses, resumeUrl };
+      console.log(form);
+      const applicationData = { formId, responses, resumeUrl, formTitle: form?.title };
 
       console.log("📤 Sending application data to API");
       const res = await fetch("/api/applications", {
@@ -245,10 +254,14 @@ export default function ApplyForm() {
       });
 
       if (!res.ok) {
-        const responseData = await res.json();
-        throw new Error(`Application submission failed: ${responseData.error}`);
+        const responseData = await res.json().catch(() => ({})); // Handle potential JSON parsing errors
+        const errorMessage = responseData.error || "Unknown error occurred"; // Fallback for missing error message
+        throw new Error(`Application submission failed: ${errorMessage}`);
       }
-
+      localStorage.removeItem("savedFormId"); // Remove any existing form ID from local storage
+      localStorage.setItem("savedFormId", Array.isArray(formId) ? formId[0] : formId || ""); // Set the new form ID
+      localStorage.setItem("savedFormId", Array.isArray(formId) ? formId[0] : formId || ""); // Ensure formId is a string
+      console.log("✅ Form ID saved to local storage:", formId);
       console.log("✅ Application submitted successfully");
       setSuccess(true);
     } catch (err: any) {
@@ -279,6 +292,25 @@ export default function ApplyForm() {
               Redirecting you in a moment...
             </p>
           </CardFooter> */}
+        </Card>
+      </div>
+    );
+  }
+  if (submittedStatus) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-green-100">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl text-green-600">Thank You!</CardTitle>
+            <CardDescription>
+              Your application has been submitted successfully. We appreciate your interest and will get back to you soon.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter className="flex justify-center">
+            <Button variant="outline" onClick={() => router.push("/")}>
+              Return to Home
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     );

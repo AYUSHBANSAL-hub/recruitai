@@ -159,6 +159,9 @@ function ApplicationsList() {
       if (!res.ok) throw new Error("Failed to update status");
 
       // Update applications list
+      const filteredApplications = applications.filter((app: Application) =>
+        forms.some((form: Form) => form.id === app.formId)
+      );   
       setApplications(
         applications.map((app) =>
           app.id === appId ? { ...app, status: newStatus } : app

@@ -1,6 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,38 +9,15 @@ datasource db {
 }
 
 model User {
-  id                  String        @id @default(cuid())
-  email               String        @unique
-  password            String        // Hashed password
-  role                UserRole      @default(CANDIDATE)
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  forms               JobForm[]     // Only for admin users
-  applications        Application[]
-  
-  // Personal information
-  firstName           String?
-  lastName            String?
-  name                String?       // Keeping for backward compatibility
-  phoneNumber         String?
-  
-  // Company information
-  companyName         String?
-  companyWebsite      String?
-  industry            String?
-  companySize         String?
-  
-  // Role information
-  jobTitle            String?
-  department          String?
-  
-  // Recruitment challenges
-  recruitmentChallenges Json?       // Stored as array of strings
-  
-  // Terms acceptance
-  acceptedTerms       Boolean       @default(false)
-  // Relations
-  sessions            Session[]
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String    // Hashed password
+  role          UserRole  @default(CANDIDATE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  forms         JobForm[] // Only for admin users
+  applications  Application[]
 }
 
 enum UserRole {
@@ -50,72 +25,13 @@ enum UserRole {
   CANDIDATE
 }
 
-model Company {
-  id                  String    @id @default(cuid())
-  name                String
-  website             String?
-  industry            String
-  size                String
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  
-  // Relations
-  users               User[]
-  jobs                Job[]
-}
-
-model Session {
-  id                  String    @id @default(cuid())
-  userId              String
-  token               String    @unique
-  expiresAt           DateTime
-  createdAt           DateTime  @default(now())
-  
-  // Relations
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Job {
-  id                  String    @id @default(cuid())
-  title               String
-  description         String
-  requirements        String[]
-  location            String?
-  type                String    // Full-time, Part-time, Contract, etc.
-  status              String    // Active, Closed, Draft
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  
-  // Relations
-  company             Company   @relation(fields: [companyId], references: [id])
-  companyId           String
-  applications        Application[]
-}
-
-model Candidate {
-  id                  String    @id @default(cuid())
-  email               String    @unique
-  firstName           String
-  lastName            String
-  phone               String?
-  resumeUrl           String?
-  skills              String[]
-  experience          Json?     // Structured experience data
-  education           Json?     // Structured education data
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  
-  // Relations
-  applications        Application[]
-}
-
 model JobForm {
   id              String        @id @default(cuid())
   title           String
-  jobDescription  String        @db.Text
-  fields          Json          // Stores FormField array
-  hiringDomain    String?       // Tech, Non-tech, or Sales
-  createdBy       User          @relation(fields: [userId], references: [id])
+  jobDescription  String       @db.Text
+  fields          Json         // Stores FormField array
+  hiringDomain    String?      // Tech, Non-tech, or Sales
+  createdBy       User         @relation(fields: [userId], references: [id])
   userId          String
   applications    Application[]
   active          Boolean       @default(true)
@@ -124,21 +40,21 @@ model JobForm {
 }
 
 model Application {
-  id              String            @id @default(cuid())
-  form            JobForm           @relation(fields: [formId], references: [id])
+  id              String    @id @default(cuid())
+  form            JobForm   @relation(fields: [formId], references: [id])
   formId          String
-  candidate       User?             @relation(fields: [userId], references: [id])
+  candidate       User?      @relation(fields: [userId], references: [id])
   userId          String?
   responses       Json
   resumeUrl       String
-  parsedResume    Json?             // ✅ Store extracted resume text
-  matchScore      Float?            // ✅ Store openrouter match score
-  matchReasoning  String?           @db.Text // ✅ Store openrouter reasoning
+  parsedResume    Json?     // ✅ Store extracted resume text
+  matchScore      Float?    // ✅ Store openrouter match score
+  matchReasoning  String?   @db.Text // ✅ Store openrouter reasoning
   status          ApplicationStatus @default(PENDING)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  strengths       String[]          // ✅ Array to store candidate strengths
-  weaknesses      String[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  strengths       String[]  // ✅ Array to store candidate strengths
+  weaknesses      String[] 
 }
 
 enum ApplicationStatus {

@@ -14,6 +14,7 @@ import {
   Award,
   AlertTriangle,
   MessageSquare,
+  Sparkle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -86,14 +87,22 @@ export default function ApplicationsList() {
   >("ALL");
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [form, setForm] = useState<any>(null);
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const res = await fetch(`/api/applications?formId=${formId}`);
-        if (!res.ok) throw new Error("Failed to fetch applications");
+        const [applicationsRes, formRes] = await Promise.all([
+          fetch(`/api/applications?formId=${formId}`),
+          fetch(`/api/forms/${formId}`)
+        ]);
 
-        const data = await res.json();
+        if (!applicationsRes.ok) throw new Error("Failed to fetch applications");
+        if (!formRes.ok) throw new Error("Failed to fetch form data");
+        const formData = await formRes.json();
+        setForm(formData);
+        const data = await applicationsRes.json();
+        console.log(formData);
         setApplications(data);
         setFilteredApplications(data);
       } catch (err: any) {
@@ -246,8 +255,11 @@ export default function ApplicationsList() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
+            <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200 mb-2">
+              {"Job Title"}
+            </Badge>
             <h1 className="text-3xl font-bold text-gray-900">
-              Talent Acquisition
+              {form?.title}
             </h1>
             <p className="text-gray-500 mt-1">
               Review and manage candidate applications
@@ -559,7 +571,7 @@ export default function ApplicationsList() {
                                   expandedRows[app.id] ? "bg-gray-50" : ""
                                 }`}
                               >
-                                <MessageSquare className="h-4 w-4 mr-1" />
+                                <Sparkle className="h-4 w-4 mr-1" />
                                 {expandedRows[app.id]
                                   ? "Hide Details"
                                   : "View Details"}
