@@ -160,6 +160,7 @@ export default function CreateForm() {
   const [domainFields, setDomainFields] = useState<FormField[]>([])
   const [aiGeneratedFields, setAiGeneratedFields] = useState<FormField[]>([])
   const [isGeneratingFields, setIsGeneratingFields] = useState(false)
+  const [isGeneratingJobDescription, setIsGeneratingJobDescription] = useState(false)
   const [editingField, setEditingField] = useState<string | null>(null)
 
   // Add a state to store the token
@@ -218,6 +219,40 @@ export default function CreateForm() {
       setError("Failed to generate fields. Please try again or add fields manually.")
     } finally {
       setIsGeneratingFields(false)
+    }
+  }
+
+  const jobDescriptionAI = async () => {
+    if (!jobDescription) {
+      setError("Please enter a job description first")
+      return
+    }
+    try {
+      setIsGeneratingJobDescription(true)
+      // Call the API route instead of the function directly
+      const response = await fetch("/api/generate-job-description", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          jobDescription,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to generate fields")
+      }
+
+      const data = await response.json()
+      setJobDescription(data.jobDescriptionAI)
+    } catch (err) {
+      console.error("Error generating job description:", err)
+      setError("Failed to generate job description. Please try again or add fields manually.")
+    } finally {
+      setIsGeneratingJobDescription(false)
     }
   }
 
@@ -680,12 +715,33 @@ export default function CreateForm() {
                   </div>
 
                   <div className="space-y-2">
+                    <div className="flex items-center justify-between w-full ">
                     <Label htmlFor="description">Job Description</Label>
+                    <Button
+                          type="button"
+                          variant="outline"
+                          className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                          onClick={jobDescriptionAI}
+                          disabled={isGeneratingJobDescription}
+                        >
+                          {isGeneratingJobDescription ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-4 w-4 mr-2" />
+                              "Rewrite with AI" 
+                            </>
+                          )}
+                        </Button>
+                    </div>
                     <div className="h-64">
                       <ReactQuill
                         theme="snow"
                         value={jobDescription}
-                        onChange={setJobDescription}
+                        onChange={(value) => setJobDescription(value)}
                         modules={quillModules}
                         formats={quillFormats}
                         placeholder="Describe the role, responsibilities, and requirements..."

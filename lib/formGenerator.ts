@@ -145,3 +145,41 @@ function generateFallbackFields(hiringDomain: string): FormField[] {
 
   return fallbackFields;
 }
+
+export async function generateJobDescription(rawJD: string) {
+  const response = await openai.chat.completions.create({
+    model: "google/gemini-2.0-flash-001",
+    messages: [
+      {
+        role: "system",
+        content: `You are an AI assistant that transforms raw or unstructured text into a well-formatted professional job description. Use the following standard format and return the output in HTML:
+
+About the job  
+Job Title: [Title]  
+Employment Type: [Full Time / Part Time / Contract]  
+Experience: [X+ Years]  
+Location: [Location Info]  
+
+About [Company Name]:  
+[Company Introduction Paragraph]
+
+Requirements  
+[List of requirements in bullet points]
+
+Role & Responsibilities  
+[List of responsibilities in bullet points]
+
+Ensure the tone is professional and the output is clean, readable, and structured as valid HTML using <div>, <h2>, <p>, and <ul>/<li> tags.`
+      },
+      {
+        role: "user",
+        content: `Here is the raw job description. Please convert it into the above format:\n\n${rawJD}`
+      }
+    ],
+  });
+
+  const jobDescriptionAI = response.choices?.[0]?.message?.content || rawJD;
+  const cleanJobDescriptionAI = jobDescriptionAI.replace(/```html/g, '').replace(/```/g, '');
+  return cleanJobDescriptionAI;
+}
+

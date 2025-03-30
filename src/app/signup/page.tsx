@@ -948,7 +948,7 @@ export default function SignUp() {
       </div>
 
       {/* Header */}
-      <header className="bg-slate-100/90 backdrop-blur-sm shadow-sm py-4 px-6 border-b border-slate-300 relative z-10">
+      {/* <header className="bg-slate-100/90 backdrop-blur-sm shadow-sm py-4 px-6 border-b border-slate-300 relative z-10">
         <div className="container mx-auto flex justify-center">
           <Link href="/" className="flex items-center space-x-2">
             <div className="relative h-8 w-8 overflow-hidden rounded-md bg-gradient-to-r from-cyan-500 to-blue-600">
@@ -959,16 +959,17 @@ export default function SignUp() {
             </span>
           </Link>
         </div>
-      </header>
+      </header> */}
 
       {/* Main content */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative z-10">
         <div className="container mx-auto max-w-7xl">
           <div className="flex flex-col lg:flex-row gap-6 items-stretch">
             {/* Left side - Form */}
-            <div className="w-full lg:w-2/3">
-              <div className="bg-slate-100/95 backdrop-blur-sm rounded-xl shadow-xl border border-slate-300 p-6 md:p-8 h-full">
+            <div className="w-full lg:w-2/3 min-h-[700px]">
+              <div className="bg-slate-100/95 backdrop-blur-sm rounded-xl shadow-xl border border-slate-300 p-6 md:p-8 h-full flex flex-col justify-between">
                 {/* Error message */}
+                <div className="flex flex-col gap-4">
                 {error && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
@@ -1041,6 +1042,7 @@ export default function SignUp() {
                     </motion.div>
                   )}
                 </form>
+                </div>
 
                 {/* Sign in link */}
                 {currentStep < 5 && (
@@ -1057,18 +1059,18 @@ export default function SignUp() {
             </div>
 
             {/* Right side - Benefits and Stats */}
-            <div className="w-full lg:w-1/3 flex flex-col gap-4">
+            <div className="w-full lg:w-1/3  flex-col gap-4 hidden lg:flex">
               {/* Current step benefit */}
-              <AnimatePresence mode="wait">{currentStep < 5 && renderCurrentBenefit()}</AnimatePresence>
 
               {/* Recruitment stats carousel */}
               {currentStep < 5 && renderRecruitmentStats()}
 
               {/* Testimonial */}
               <AnimatePresence mode="wait">{currentStep < 5 && renderTestimonial()}</AnimatePresence>
+              <AnimatePresence mode="wait">{currentStep < 5 && renderCurrentBenefit()}</AnimatePresence>
 
               {/* Path to better hiring */}
-              {currentStep < 5 && (
+              {/* {currentStep < 5 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1111,16 +1113,16 @@ export default function SignUp() {
                     ))}
                   </div>
                 </motion.div>
-              )}
+              )} */}
             </div>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="py-4 px-6 text-center text-slate-600 text-sm bg-slate-200/50 border-t border-slate-300 relative z-10">
+      {/* <footer className="py-4 px-6 text-center text-slate-600 text-sm bg-slate-200/50 border-t border-slate-300 relative z-10">
         <p>&copy; {new Date().getFullYear()} RecruitAI. All rights reserved.</p>
-      </footer>
+      </footer> */}
     </div>
   )
 }

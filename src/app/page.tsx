@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function LandingPage() {
   // Refs for scroll animations
@@ -374,16 +375,15 @@ export default function LandingPage() {
                   </span>{" "}
                   <br />
                   <span className="text-white">
-                    <span className="relative">
-                      Discover
+                    Discover Your <span className="relative">
+                      Perfect
                       <motion.span
                         className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500"
                         initial={{ width: 0 }}
                         animate={{ width: "100%" }}
                         transition={{ duration: 1, delay: 0.5 }}
                       />
-                    </span>{" "}
-                    Your Perfect Match.
+                    </span>{" "} Match.
                   </span>
                 </h1>
                 <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl mx-auto lg:mx-0">
@@ -440,7 +440,7 @@ export default function LandingPage() {
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur-xl opacity-50 animate-pulse" />
                   <div className="relative bg-slate-900 backdrop-blur-sm border border-slate-800 rounded-xl shadow-2xl overflow-hidden">
                     <Image
-                      src="/placeholder.svg?height=600&width=800"
+                      src="/dashboard.jpeg"
                       alt="RecruitAI Dashboard"
                       width={800}
                       height={600}
@@ -660,7 +660,10 @@ export default function LandingPage() {
                           className="flex items-center p-3 bg-slate-800 rounded-lg border border-slate-700"
                         >
                           <div className="h-10 w-10 rounded-full bg-slate-700 mr-3 overflow-hidden">
-                            <Image src={`/placeholder.svg?height=40&width=40`} alt="Candidate" width={40} height={40} />
+                            <Avatar>
+                              <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Candidate" />
+                              <AvatarFallback className="bg-slate-700 text-white">A</AvatarFallback>
+                            </Avatar>
                           </div>
                           <div className="flex-1">
                             <div className="h-3 w-24 bg-slate-700 rounded-full mb-2"></div>
@@ -755,16 +758,12 @@ export default function LandingPage() {
                         ].map((candidate, i) => (
                           <div
                             key={i}
-                            className="flex items-center p-4 bg-slate-800/50 rounded-lg border border-slate-700 hover:border-cyan-500/50 transition-all group"
+                            className="flex items-center p-4 bg-slate-800/50 rounded-lg border border-slate-700 hover:border-cyan-500/50 transition-all group gap-4"
                           >
-                            <div className="h-12 w-12 rounded-full bg-slate-700 mr-4 overflow-hidden">
-                              <Image
-                                src={`/placeholder.svg?height=48&width=48`}
-                                alt={candidate.name}
-                                width={48}
-                                height={48}
-                              />
-                            </div>
+                              <Avatar>
+                                <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Candidate" />
+                                <AvatarFallback className="bg-slate-700 text-white">A</AvatarFallback>
+                              </Avatar>
                             <div className="flex-1">
                               <div className="flex justify-between">
                                 <h4 className="font-medium text-white">{candidate.name}</h4>
@@ -792,9 +791,6 @@ export default function LandingPage() {
                                 ))}
                               </div>
                             </div>
-                            <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
-                              <ChevronDown className="h-4 w-4" />
-                            </Button>
                           </div>
                         ))}
                       </div>
@@ -1206,13 +1202,10 @@ export default function LandingPage() {
                     <p className="text-slate-300 mb-6 relative z-10">{testimonial.quote}</p>
                     <div className="flex items-center">
                       <div className="mr-4">
-                        <Image
-                          src={testimonial.avatar || "/placeholder.svg"}
-                          alt={testimonial.author}
-                          width={48}
-                          height={48}
-                          className="h-12 w-12 rounded-full object-cover border-2 border-slate-700"
-                        />
+                        <Avatar>
+                          <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Candidate" />
+                          <AvatarFallback className="bg-slate-700 text-white">A</AvatarFallback>
+                        </Avatar>
                       </div>
                       <div>
                         <div className="font-medium text-white">{testimonial.author}</div>
@@ -1257,7 +1250,7 @@ export default function LandingPage() {
               {plans.map((plan, index) => (
                 <motion.div
                   key={index}
-                  className={`relative bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border ${plan.popular ? "border-cyan-500 shadow-lg shadow-cyan-500/10" : "border-slate-700 hover:border-slate-600"} overflow-hidden group transition-all`}
+                  className={`flex flex-col justify-between bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border ${plan.popular ? "border-cyan-500 shadow-lg shadow-cyan-500/10" : "border-slate-700 hover:border-slate-600"} overflow-hidden group transition-all h-full`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={pricingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                   transition={{ duration: 0.5, delay: 0.1 * index }}
@@ -1267,6 +1260,7 @@ export default function LandingPage() {
                       Most Popular
                     </div>
                   )}
+                  <div className="flex h-full flex-col">
                   <div className="mb-6">
                     <h3 className="text-xl font-bold mb-2 text-white">{plan.name}</h3>
                     <div className="flex items-baseline">
@@ -1283,6 +1277,7 @@ export default function LandingPage() {
                       </li>
                     ))}
                   </ul>
+                  </div>
                   <Button
                     className={`w-full ${plan.popular ? "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0" : "bg-transparent border border-slate-700 text-white hover:bg-slate-700"}`}
                     variant={plan.popular ? "default" : "outline"}
