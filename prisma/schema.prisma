@@ -1,4 +1,3 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,15 +8,40 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  password      String    // Hashed password
-  role          UserRole  @default(CANDIDATE)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  forms         JobForm[] // Only for admin users
-  applications  Application[]
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      UserRole @default(CANDIDATE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Personal Info
+  firstName   String?
+  lastName    String?
+  name        String? // For backward compatibility
+  phoneNumber String?
+
+  // Company Info (Embedded — FOR BACKWARD COMPATIBILITY)
+  companyName    String?
+  companyWebsite String?
+  industry       String?
+  companySize    String?
+
+  // Role Info
+  jobTitle   String?
+  department String?
+
+  // Other Info
+  recruitmentChallenges Json?
+  acceptedTerms         Boolean @default(false)
+
+  // Future-proofed relation
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  forms        JobForm[]
+  applications Application[]
+  sessions     Session[]
 }
 
 enum UserRole {
@@ -25,36 +49,78 @@ enum UserRole {
   CANDIDATE
 }
 
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  website   String?
+  industry  String
+  size      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  users User[]
+  jobs  Job[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Job {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  requirements String[]
+  location     String?
+  type         String
+  status       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+
+  companyId    String
+  company      Company       @relation(fields: [companyId], references: [id])
+  applications Application[]
+}
+
 model JobForm {
-  id              String        @id @default(cuid())
-  title           String
-  jobDescription  String       @db.Text
-  fields          Json         // Stores FormField array
-  hiringDomain    String?      // Tech, Non-tech, or Sales
-  createdBy       User         @relation(fields: [userId], references: [id])
-  userId          String
-  applications    Application[]
-  active          Boolean       @default(true)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  title          String
+  jobDescription String        @db.Text
+  fields         Json
+  hiringDomain   String?
+  createdBy      User          @relation(fields: [userId], references: [id])
+  userId         String
+  applications   Application[]
+  active         Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Application {
-  id              String    @id @default(cuid())
-  form            JobForm   @relation(fields: [formId], references: [id])
-  formId          String
-  candidate       User?      @relation(fields: [userId], references: [id])
-  userId          String?
-  responses       Json
-  resumeUrl       String
-  parsedResume    Json?     // ✅ Store extracted resume text
-  matchScore      Float?    // ✅ Store openrouter match score
-  matchReasoning  String?   @db.Text // ✅ Store openrouter reasoning
-  status          ApplicationStatus @default(PENDING)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  strengths       String[]  // ✅ Array to store candidate strengths
-  weaknesses      String[] 
+  id             String            @id @default(cuid())
+  formId         String
+  userId         String?
+  jobId          String? // ✅ Add this
+  resumeUrl      String
+  responses      Json
+  parsedResume   Json?
+  matchScore     Float?
+  matchReasoning String?           @db.Text
+  status         ApplicationStatus @default(PENDING)
+  strengths      String[]
+  weaknesses     String[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @default(now())
+
+  form      JobForm @relation(fields: [formId], references: [id])
+  candidate User?   @relation(fields: [userId], references: [id])
+  job       Job?    @relation(fields: [jobId], references: [id]) // ✅ Added this
 }
 
 enum ApplicationStatus {

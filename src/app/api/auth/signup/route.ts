@@ -21,20 +21,13 @@ export async function POST(request: Request) {
       recruitmentChallenges,
       acceptTerms,
     } = await request.json()
-    if(!email || !password || !firstName || !lastName || !phoneNumber || !companyName || !companyWebsite || !industry || !companySize || !jobTitle || !department || !recruitmentChallenges || !acceptTerms) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Validate email format
-    if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    // Validation (basic)
+    if (!email || !password || !firstName || !lastName || !companyName || !industry || !companySize || !jobTitle || !department || !acceptTerms) {
+      return NextResponse.json({ error: "Please fill all required fields." }, { status: 400 })
     }
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    })
 
+    const existingUser = await prisma.user.findUnique({ where: { email } })
     if (existingUser) {
       return NextResponse.json({ error: "User already exists" }, { status: 400 })
     }
@@ -42,38 +35,55 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create new user with all the additional information
-    const newUser = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        role: "ADMIN", // Ensure users sign up with this role
-
-        // Personal information
-        firstName: firstName || null,
-        lastName: lastName || null,
-        name: firstName && lastName ? `${firstName} ${lastName}` : null, // Set name for backward compatibility
-        phoneNumber: phoneNumber || null,
-
-        // Company information
-        companyName: companyName || null,
-        companyWebsite: companyWebsite || null,
-        industry: industry || null,
-        companySize: companySize || null,
-
-        // Role information
-        jobTitle: jobTitle || null,
-        department: department || null,
-
-        // Recruitment challenges
-        recruitmentChallenges: recruitmentChallenges ? JSON.stringify(recruitmentChallenges) : null,
-
-        // Terms acceptance
-        acceptedTerms: acceptTerms || false,
+    // Check if a company already exists with the same name and website
+    let company = await prisma.company.findFirst({
+      where: {
+        name: companyName,
+        website: companyWebsite || undefined,
       },
     })
 
-    return NextResponse.json({ message: "User created successfully", userId: newUser.id }, { status: 201 })
+    if (!company) {
+      company = await prisma.company.create({
+        data: {
+          name: companyName,
+          website: companyWebsite || undefined,
+          industry,
+          size: companySize,
+        },
+      })
+    }
+
+    // Create new user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        role: "ADMIN",
+
+        // Personal
+        firstName,
+        lastName,
+        name: `${firstName} ${lastName}`,
+        phoneNumber: phoneNumber || null,
+
+        // Company (embedded for now)
+        companyName,
+        companyWebsite: companyWebsite || null,
+        industry,
+        companySize,
+        companyId: company.id,
+
+        // Role Info
+        jobTitle,
+        department,
+
+        recruitmentChallenges: recruitmentChallenges?.length ? recruitmentChallenges : [],
+        acceptedTerms: true,
+      },
+    })
+
+    return NextResponse.json({ message: "User created successfully", userId: user.id }, { status: 201 })
   } catch (error) {
     console.error("Signup error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
