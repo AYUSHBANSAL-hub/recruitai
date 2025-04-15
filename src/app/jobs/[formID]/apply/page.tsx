@@ -122,7 +122,6 @@ export default function ApplyForm() {
   };
 
   const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setResumeError("");
 
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
@@ -199,7 +198,7 @@ export default function ApplyForm() {
     // Validate all required fields
     form?.fields.forEach((field) => {
       if (
-        field.required &&
+        field.required && field.id!="fixed-resume" &&
         (!responses[field.id] || responses[field.id].trim() === "")
       ) {
         errors[field.id] = `${field.label} is required`;

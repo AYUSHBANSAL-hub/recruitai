@@ -35,7 +35,7 @@ const Navbar = () => {
       <div className="mx-auto flex h-full max-w-screen-2xl items-center justify-between px-4">
         <div className="flex items-center gap-6">
           <Link href="/" className="text-2xl font-bold">
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Recruit AI</span>
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">HirezApp</span>
           </Link>
         </div>
 

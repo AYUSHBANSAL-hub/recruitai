@@ -20,14 +20,14 @@ const welcomeEmailTemplates: Record<
   (name: string) => EmailTemplate
 > = {
   welcome: (name) => ({
-    subject: `Welcome to Recruit AI`,
+    subject: `Welcome to HirezApp`,
     html: `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to Recruit AI</title>
+        <title>Welcome to HirezApp</title>
         <style>
           body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -41,17 +41,17 @@ const welcomeEmailTemplates: Record<
       <body>
         <div class="container">
           <div class="header">
-            <h1>Recruit AI</h1>
+            <h1>HirezApp</h1>
           </div>
           <div class="content">
             <h2>Hello ${name},</h2>
-            <p>Welcome to Recruit AI! We're excited to have you on board.</p>
+            <p>Welcome to HirezApp! We're excited to have you on board.</p>
             <p>We're here to help you find your dream job and make the hiring process as smooth as possible.</p>
             <p>If you have any questions, please don't hesitate to contact our support team.</p>
-            <p>Best regards,<br/>Recruit AI Team</p>
+            <p>Best regards,<br/>HirezApp Team</p>
           </div>
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Recruit AI. All rights reserved.</p>
+            <p>© ${new Date().getFullYear()} HirezApp. All rights reserved.</p>
             <p>This is an automated message, please do not reply to this email.</p>
           </div>
         </div>
@@ -66,7 +66,7 @@ const statusEmailTemplates: Record<
   (name: string, jobTitle: string, applicationDate: string, calendarLink?: string) => EmailTemplate
 > = {
   reviewed: (name, jobTitle, applicationDate) => ({
-    subject: `Your application for ${jobTitle} has been reviewed | Recruit AI`,
+    subject: `Your application for ${jobTitle} has been reviewed | HirezApp`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -88,7 +88,7 @@ const statusEmailTemplates: Record<
       <body>
         <div class="container">
           <div class="header">
-            <h1>Recruit AI</h1>
+            <h1>HirezApp</h1>
           </div>
           <div class="content">
             <h2>Hello ${name},</h2>
@@ -102,10 +102,10 @@ const statusEmailTemplates: Record<
             <p>Our hiring team is currently evaluating all candidates, and we will be in touch soon with more information about next steps.</p>
             <p>If you have any questions in the meantime, please don't hesitate to contact our recruitment team.</p>
             <p>Thank you for your interest in joining our team!</p>
-            <p>Best regards,<br/>Recruit AI Team</p>
+            <p>Best regards,<br/>HirezApp Team</p>
           </div>
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Recruit AI. All rights reserved.</p>
+            <p>© ${new Date().getFullYear()} HirezApp. All rights reserved.</p>
             <p>This is an automated message, please do not reply to this email.</p>
           </div>
         </div>
@@ -114,7 +114,7 @@ const statusEmailTemplates: Record<
     `,
   }),
   shortlisted: (name, jobTitle, applicationDate, calendarLink) => ({
-    subject: `Congratulations! You've been shortlisted for ${jobTitle} | Recruit AI`,
+    subject: `Congratulations! You've been shortlisted for ${jobTitle} | HirezApp`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -139,7 +139,7 @@ const statusEmailTemplates: Record<
       <body>
         <div class="container">
           <div class="header">
-            <h1>Recruit AI</h1>
+            <h1>HirezApp</h1>
           </div>
           <div class="content">
             <div class="success-banner">
@@ -170,10 +170,10 @@ const statusEmailTemplates: Record<
             
             <p>We look forward to speaking with you soon!</p>
             
-            <p>Best regards,<br/>Recruit AI Team</p>
+            <p>Best regards,<br/>HirezApp Team</p>
           </div>
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Recruit AI. All rights reserved.</p>
+            <p>© ${new Date().getFullYear()} HirezApp. All rights reserved.</p>
             <p>This is an automated message, please do not reply to this email.</p>
           </div>
         </div>
@@ -182,7 +182,7 @@ const statusEmailTemplates: Record<
     `,
   }),
   rejected: (name, jobTitle, applicationDate) => ({
-    subject: `Update on your ${jobTitle} application | Recruit AI`,
+    subject: `Update on your ${jobTitle} application | HirezApp`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -206,7 +206,7 @@ const statusEmailTemplates: Record<
       <body>
         <div class="container">
           <div class="header">
-            <h1>Recruit AI</h1>
+            <h1>HirezApp</h1>
           </div>
           <div class="content">
             <h2>Hello ${name},</h2>
@@ -230,10 +230,10 @@ const statusEmailTemplates: Record<
             
             <p>We appreciate your interest in joining our team and wish you success in your job search and professional endeavors.</p>
             
-            <p>Best regards,<br/>Recruit AI Team</p>
+            <p>Best regards,<br/>HirezApp Team</p>
           </div>
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Recruit AI. All rights reserved.</p>
+            <p>© ${new Date().getFullYear()} HirezApp. All rights reserved.</p>
             <p>This is an automated message, please do not reply to this email.</p>
           </div>
         </div>
@@ -290,7 +290,7 @@ const applicationSubmittedEmailTemplate: Record<
   (name: string, jobTitle: string) => EmailTemplate
 > = {
   submitted: (name, jobTitle) => ({
-    subject: `Application Submitted for ${jobTitle} | Recruit AI`,
+    subject: `Application Submitted for ${jobTitle} | HirezApp`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -314,7 +314,7 @@ const applicationSubmittedEmailTemplate: Record<
       <body>
         <div class="container">
           <div class="header">
-            <h1>Recruit AI</h1>
+            <h1>HirezApp</h1>
           </div>
           <div class="content">
             <h2>Hi ${name},</h2>
@@ -323,10 +323,10 @@ const applicationSubmittedEmailTemplate: Record<
             <p>While we’re not able to reach out to every applicant, our recruiting team will contact you if your skills and experience are a strong match for the role. In the meantime, join the conversation about job opportunities and life at ${jobTitle} on our LinkedIn page..</p>
             <p>We appreciate your interest in joining our team and wish you success in your job search and professional endeavors.</p>
             
-            <p>Best regards,<br/>Recruit AI Team</p>
+            <p>Best regards,<br/>HirezApp Team</p>
           </div>
           <div class="footer">
-            <p>© ${new Date().getFullYear()} Recruit AI. All rights reserved.</p>
+            <p>© ${new Date().getFullYear()} HirezApp. All rights reserved.</p>
             <p>This is an automated message, please do not reply to this email.</p>
           </div>
         </div>

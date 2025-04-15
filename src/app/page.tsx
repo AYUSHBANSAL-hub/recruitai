@@ -155,8 +155,8 @@ export default function LandingPage() {
     {
       quote:
         "We used to spend 18 hours per week just sorting through resumes. With HirezApp, we've cut that down to just 2 hours, and the quality of our shortlists has dramatically improved. The ROI was immediate.",
-      author: "Sarah Johnson",
-      title: "Head of Talent Acquisition, TechGlobal Inc.",
+      author: "Vanshaj Arora",
+      title: "Consultant Google(xWF)",
       avatar: "/placeholder.svg?height=80&width=80",
       metrics: {
         "Screening time reduction": "89%",
@@ -166,8 +166,8 @@ export default function LandingPage() {
     {
       quote:
         "What impressed me most was the accuracy. The AI found patterns in successful employees that we hadn't noticed ourselves and now uses those insights to identify promising candidates that we would have overlooked.",
-      author: "Michael Chen",
-      title: "CTO, Innovate Solutions",
+      author: "Kishan Maitin",
+      title: "Your Web Solutions - Co-Founder",
       avatar: "/placeholder.svg?height=80&width=80",
       metrics: {
         "Candidate quality improvement": "65%",
@@ -177,8 +177,8 @@ export default function LandingPage() {
     {
       quote:
         "As a fast-growing startup, we couldn't afford to make hiring mistakes. HirezApp not only streamlined our process but actually increased our diversity hiring by surfacing qualified candidates we would have missed with traditional screening.",
-      author: "Emily Rodriguez",
-      title: "VP of Human Resources, Global Enterprises",
+      author: "Ayush Bansal",
+      title: "Acciojob - Product Manager",
       avatar: "/placeholder.svg?height=80&width=80",
       metrics: {
         "Time-to-hire reduction": "41%",
@@ -1224,7 +1224,7 @@ export default function LandingPage() {
                   transition={{ duration: 0.5, delay: 0.1 * index }}
                 >
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity" />
-                  <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2 text-6xl text-cyan-500/10 font-serif">
+                  <div className="absolute -top-2 right-0 transform translate-x-2 -translate-y-2 text-6xl text-cyan-500 font-serif">
                     "
                   </div>
                   <div className="relative">
@@ -1233,7 +1233,7 @@ export default function LandingPage() {
                       <div className="mr-4">
                         <Avatar>
                           <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Candidate" />
-                          <AvatarFallback className="bg-slate-700 text-white">A</AvatarFallback>
+                          <AvatarFallback className="bg-slate-700 text-white">{testimonial.author.charAt(0)}</AvatarFallback>
                         </Avatar>
                       </div>
                       <div>

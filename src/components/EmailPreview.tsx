@@ -28,7 +28,7 @@ export default function EmailPreview({
             <div className="flex items-center gap-2 p-3 border-b bg-indigo-50">
               <CheckCircle className="h-4 w-4 text-green-500" />
               <p className="font-medium text-sm">
-                Subject: Congratulations! You've been shortlisted for {jobTitle} | Recruit AI
+                Subject: Congratulations! You've been shortlisted for {jobTitle} | HirezApp
               </p>
             </div>
             <div className="p-4 space-y-3 text-sm">
@@ -79,11 +79,11 @@ export default function EmailPreview({
               <p>
                 Best regards,
                 <br />
-                Recruit AI Team
+                HirezApp Team
               </p>
 
               <div className="text-center text-xs text-gray-500 border-t pt-3 mt-4">
-                © {new Date().getFullYear()} Recruit AI. All rights reserved.
+                © {new Date().getFullYear()} HirezApp. All rights reserved.
               </div>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function EmailPreview({
           <div className="space-y-0">
             <div className="flex items-center gap-2 p-3 border-b bg-indigo-50">
               <AlertCircle className="h-4 w-4 text-gray-500" />
-              <p className="font-medium text-sm">Subject: Update on your {jobTitle} application | Recruit AI</p>
+              <p className="font-medium text-sm">Subject: Update on your {jobTitle} application | HirezApp</p>
             </div>
             <div className="p-4 space-y-3 text-sm">
               <p>Hello {candidateName},</p>
@@ -130,11 +130,11 @@ export default function EmailPreview({
               <p>
                 Best regards,
                 <br />
-                Recruit AI Team
+                HirezApp Team
               </p>
 
               <div className="text-center text-xs text-gray-500 border-t pt-3 mt-4">
-                © {new Date().getFullYear()} Recruit AI. All rights reserved.
+                © {new Date().getFullYear()} HirezApp. All rights reserved.
               </div>
             </div>
           </div>

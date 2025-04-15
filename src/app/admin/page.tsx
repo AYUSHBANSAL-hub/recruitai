@@ -529,122 +529,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Application Status Chart */}
-          <Card className="bg-white border-gray-200 shadow-sm lg:col-span-1">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold text-gray-900">
-                Application Status
-              </CardTitle>
-              <CardDescription className="text-gray-500">
-                Distribution of applications by status
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex justify-center items-center h-40">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium text-gray-700">Pending</span>
-                      <span className="text-gray-500">
-                        {stats.pendingReviews} applications
-                      </span>
-                    </div>
-                    <Progress
-                      value={
-                        (stats.pendingReviews / stats.totalApplications) *
-                          100 || 0
-                      }
-                      max={100}
-                      className="h-2 bg-gray-100"
-                      indicatorclassname="bg-amber-500"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium text-gray-700">
-                        Reviewed
-                      </span>
-                      <span className="text-gray-500">
-                        {
-                          applications.filter(
-                            (app) => app.status === "REVIEWED"
-                          ).length
-                        }{" "}
-                        applications
-                      </span>
-                    </div>
-                    <Progress
-                      value={
-                        (applications.filter((app) => app.status === "REVIEWED")
-                          .length /
-                          stats.totalApplications) *
-                          100 || 0
-                      }
-                      max={100}
-                      className="h-2 bg-gray-100"
-                      indicatorclassname="bg-indigo-500"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium text-gray-700">
-                        Shortlisted
-                      </span>
-                      <span className="text-gray-500">
-                        {stats.shortlisted} applications
-                      </span>
-                    </div>
-                    <Progress
-                      value={
-                        (stats.shortlisted / stats.totalApplications) * 100 || 0
-                      }
-                      max={100}
-                      className="h-2 bg-gray-100"
-                      indicatorclassname="bg-emerald-500"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium text-gray-700">
-                        Rejected
-                      </span>
-                      <span className="text-gray-500">
-                        {stats.rejected} applications
-                      </span>
-                    </div>
-                    <Progress
-                      value={
-                        (stats.rejected / stats.totalApplications) * 100 || 0
-                      }
-                      max={100}
-                      className="h-2 bg-gray-100"
-                      indicatorclassname="bg-rose-500"
-                    />
-                  </div>
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className="pt-0">
-              <Button
-                variant="outline"
-                className="w-full text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                onClick={() => router.push("/admin/applications")}
-              >
-                View All Applications
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </CardFooter>
-          </Card>
-
+ 
           {/* Recent Applications */}
           <Card className="bg-white border-gray-200 shadow-sm lg:col-span-2">
             <CardHeader className="pb-2">
@@ -732,8 +617,6 @@ export default function AdminDashboard() {
               </Button>
             </CardFooter>
           </Card>
-        </div>
-
         
       </div>
     </div>

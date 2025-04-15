@@ -289,11 +289,6 @@ export default function CreateForm() {
       // Otherwise it's a custom field
       setCustomFields(customFields.map((field) => (field.id === id ? { ...field, ...updates } : field)))
     }
-
-    // Close editing mode if we were editing this field
-    if (editingField === id) {
-      setEditingField(null)
-    }
   }
 
   const removeField = (id: string) => {

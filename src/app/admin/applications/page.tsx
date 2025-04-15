@@ -87,63 +87,66 @@ function ApplicationsList() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [currentForm, setCurrentForm] = useState<Form | null>(null);
 
-  const searchParams = useSearchParams();
-  const formId = searchParams.get("formId");
-
   useEffect(() => {
-    const fetchForms = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/forms");
-        const data = await res.json();
-        setForms(data);
+        const [formsRes, applicationsRes] = await Promise.all([
+          fetch("/api/forms"),
+          fetch("/api/applications"),
+        ]);
 
-        if (formId) {
-          const form = data.find((f: Form) => f.id === formId);
-          if (form) setCurrentForm(form);
+        if (!formsRes.ok || !applicationsRes.ok) {
+          throw new Error(
+            `Failed to fetch data: Forms ${formsRes.status}, Applications ${applicationsRes.status}`
+          );
         }
+        const formsData = await formsRes.json();
+        const applicationsData = await applicationsRes.json();
+       // Enhance forms with application counts
+        const filtApplications = applicationsData.filter((app: Application) =>
+          formsData.some((form: Form) => form.id === app.formId)
+        );        
+        setForms(formsData);
+        setApplications(filtApplications);
+        setFilteredApplications(filtApplications);
       } catch (error) {
-        console.error("Error fetching forms:", error);
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
+    fetchData();
+  }, []);
 
-    fetchForms();
-  }, [formId]);
 
-  useEffect(() => {
-    if (formId) {
-      fetchApplications(formId);
-    } else {
-      fetchAllApplications();
-    }
-  }, [formId]);
+  // useEffect(() => {
+  //   const fetchForms = async () => {
+  //     try {
+  //       const res = await fetch("/api/forms");
+  //       const data = await res.json();
+  //       setForms(data);
+  //     } catch (error) {
+  //       console.error("Error fetching forms:", error);
+  //     }
+  //   };
+  //     fetchAllApplications();
+  //     fetchForms();
+  // }, []);
 
-  const fetchApplications = async (formId: string) => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/applications?formId=${formId}`);
-      const data = await res.json();
-      setApplications(data);
-      setFilteredApplications(data);
-    } catch (error) {
-      console.error("Error fetching applications:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const fetchAllApplications = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/applications");
-      const data = await res.json();
-      setApplications(data);
-      setFilteredApplications(data);
-    } catch (error) {
-      console.error("Error fetching all applications:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchAllApplications = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const res = await fetch("/api/applications");
+  //     const data = await res.json();
+  //     setApplications(data);
+  //     setFilteredApplications(data);
+  //   } catch (error) {
+  //     console.error("Error fetching all applications:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const updateStatus = async (
     appId: string,
@@ -919,8 +922,8 @@ const exportToCSV = (applications: Application[]) => {
     "Applied Date",
   ];
   const rows = applications.map((app) => [
-    app.userId || "Anonymous",
-    app.responses.email || "N/A",
+    app.responses["fixed-name"] || "Anonymous",
+    app.responses["fixed-email"] || "N/A",
     app.matchScore !== null ? `${app.matchScore}%` : "N/A",
     app.status,
     app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "N/A",
@@ -985,6 +988,7 @@ export default function ApplicationsPage() {
           <Button
             onClick={() => exportToCSV(allApplications)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            disabled={allApplications.length==0}
           >
             <Download className="h-4 w-4 mr-2" />
             Export to CSV
