@@ -128,7 +128,7 @@ const stepBenefits = [
 // Testimonials
 const testimonials = [
   {
-    quote: "RecruitAI cut our screening time by 89% and improved our quality of hires dramatically.",
+    quote: "HirezApp cut our screening time by 89% and improved our quality of hires dramatically.",
     author: "Sarah J.",
     role: "Head of Talent Acquisition",
   },
@@ -784,7 +784,7 @@ export default function SignUp() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Account Created Successfully!</h2>
           <p className="text-gray-600 mt-2">
-            Welcome to RecruitAI, {formData.firstName}! Your account has been created and you're ready to transform your
+            Welcome to HirezApp, {formData.firstName}! Your account has been created and you're ready to transform your
             hiring process.
           </p>
         </div>
@@ -955,7 +955,7 @@ export default function SignUp() {
               <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">R</div>
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
-              RecruitAI
+              HirezApp
             </span>
           </Link>
         </div>
@@ -1121,7 +1121,7 @@ export default function SignUp() {
 
       {/* Footer */}
       {/* <footer className="py-4 px-6 text-center text-slate-600 text-sm bg-slate-200/50 border-t border-slate-300 relative z-10">
-        <p>&copy; {new Date().getFullYear()} RecruitAI. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} HirezApp. All rights reserved.</p>
       </footer> */}
     </div>
   )

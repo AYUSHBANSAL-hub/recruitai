@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { AvatarCircles } from "@/components/AvatarCircle"
 
 export default function LandingPage() {
   // Refs for scroll animations
@@ -153,7 +154,7 @@ export default function LandingPage() {
   const testimonials = [
     {
       quote:
-        "We used to spend 18 hours per week just sorting through resumes. With RecruitAI, we've cut that down to just 2 hours, and the quality of our shortlists has dramatically improved. The ROI was immediate.",
+        "We used to spend 18 hours per week just sorting through resumes. With HirezApp, we've cut that down to just 2 hours, and the quality of our shortlists has dramatically improved. The ROI was immediate.",
       author: "Sarah Johnson",
       title: "Head of Talent Acquisition, TechGlobal Inc.",
       avatar: "/placeholder.svg?height=80&width=80",
@@ -175,7 +176,7 @@ export default function LandingPage() {
     },
     {
       quote:
-        "As a fast-growing startup, we couldn't afford to make hiring mistakes. RecruitAI not only streamlined our process but actually increased our diversity hiring by surfacing qualified candidates we would have missed with traditional screening.",
+        "As a fast-growing startup, we couldn't afford to make hiring mistakes. HirezApp not only streamlined our process but actually increased our diversity hiring by surfacing qualified candidates we would have missed with traditional screening.",
       author: "Emily Rodriguez",
       title: "VP of Human Resources, Global Enterprises",
       avatar: "/placeholder.svg?height=80&width=80",
@@ -253,6 +254,12 @@ export default function LandingPage() {
     "Struggling with biased hiring decisions",
     "Unable to measure recruitment ROI effectively",
   ]
+  const avatarUrls = [
+    "https://avatars.githubusercontent.com/u/16860528",
+    "https://avatars.githubusercontent.com/u/20110627",
+    "https://avatars.githubusercontent.com/u/106103625",
+    "https://avatars.githubusercontent.com/u/59228569",
+  ];
 
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0)
 
@@ -306,7 +313,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  RecruitAI
+                  HirezApp
                 </span>
               </Link>
             </div>
@@ -403,26 +410,14 @@ export default function LandingPage() {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="rounded-md px-8 py-6 text-base font-medium border-slate-700 text-white bg-transparent hover:bg-slate-800"
+                      className="rounded-md px-8 py-6 text-base font-medium border-slate-700 text-white bg-transparent hover:bg-slate-800 hover:text-white"
                     >
                       See The Problem
                     </Button>
                   </Link>
                 </div>
                 <div className="mt-8 flex items-center justify-center lg:justify-start">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="inline-block h-8 w-8 rounded-full ring-2 ring-slate-950 overflow-hidden">
-                        <Image
-                          src={`/placeholder.svg?height=32&width=32`}
-                          alt={`User ${i}`}
-                          width={32}
-                          height={32}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
+                <AvatarCircles numPeople={99} avatarUrls={avatarUrls} />
                   <div className="ml-3 text-sm text-slate-400">
                     <span className="font-medium text-cyan-400">500+</span> companies making data-driven hiring
                     decisions
@@ -441,7 +436,7 @@ export default function LandingPage() {
                   <div className="relative bg-slate-900 backdrop-blur-sm border border-slate-800 rounded-xl shadow-2xl overflow-hidden">
                     <Image
                       src="/dashboard.jpeg"
-                      alt="RecruitAI Dashboard"
+                      alt="HirezApp Dashboard"
                       width={800}
                       height={600}
                       className="w-full h-auto"
@@ -508,7 +503,7 @@ export default function LandingPage() {
         </section>
 
         {/* Problem Statement Section */}
-        <section id="problem" ref={problemRef} className="py-24 bg-slate-900 relative overflow-hidden">
+        <section id="problem" ref={problemRef} className="py-10 relative overflow-hidden">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div
               className="text-center max-w-3xl mx-auto mb-16"
@@ -547,7 +542,7 @@ export default function LandingPage() {
                 animate={problemInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                <div className="text-6xl font-bold text-rose-400 mb-2">{applicationCount}</div>
+                <div className="text-6xl font-bold text-cyan-400 mb-2">{applicationCount}</div>
                 <div className="text-lg font-medium mb-3">Applications per position</div>
                 <p className="text-slate-400 mb-4">
                   The average corporate job opening receives hundreds of applications, making manual review nearly
@@ -564,7 +559,7 @@ export default function LandingPage() {
                 animate={problemInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <div className="text-6xl font-bold text-amber-400 mb-2">{timeValue}%</div>
+                <div className="text-6xl font-bold text-cyan-400 mb-2">{timeValue}%</div>
                 <div className="text-lg font-medium mb-3">Time wasted on screening</div>
                 <p className="text-slate-400 mb-4">
                   HR teams spend most of their time on administrative screening rather than engaging top talent.
@@ -580,7 +575,7 @@ export default function LandingPage() {
                 animate={problemInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <div className="text-6xl font-bold text-emerald-400 mb-2">{qualityCandidates}</div>
+                <div className="text-6xl font-bold text-cyan-400 mb-2">{qualityCandidates}</div>
                 <div className="text-lg font-medium mb-3">Quality candidates missed</div>
                 <p className="text-slate-400 mb-4">
                   On average, traditional screening methods overlook more than 40% of qualified candidates.
@@ -689,6 +684,121 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* How It Works Section */}
+        <section id="how-it-works" ref={howItWorksRef} className="py-24  relative overflow-hidden">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <Badge className="mb-4 px-3 py-1 bg-cyan-500/10 text-cyan-400 border-cyan-500/20 rounded-full">
+                Simple Process
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">How HirezApp Works</h2>
+              <p className="text-lg text-slate-300">
+                A streamlined workflow powered by sophisticated AI that integrates seamlessly with your existing
+                processes
+              </p>
+            </div>
+
+            <div className="relative">
+              {/* Connection line */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-800 transform -translate-x-1/2 hidden md:block" />
+
+              <div className="space-y-24 md:space-y-0 relative">
+                {[
+                  {
+                    step: "01",
+                    title: "Connect Your Data Sources",
+                    description:
+                      "Integrate with LinkedIn, job boards, your ATS, or upload resumes directly. Our system handles all major formats and maintains data integrity.",
+                    icon: <Database className="h-6 w-6 text-white" />,
+                    detailPoints: [
+                      "Automatic data normalization across platforms",
+                      "Secure API connections to major job boards",
+                      "Real-time synchronization with your ATS",
+                    ],
+                  },
+                  {
+                    step: "02",
+                    title: "Define Your Ideal Candidate Profile",
+                    description:
+                      "Set up your custom requirements including must-have skills, experience levels, and cultural attributes that matter to your organization.",
+                    icon: <Users className="h-6 w-6 text-white" />,
+                    detailPoints: [
+                      "Customizable scoring criteria",
+                      "Weight different factors based on importance",
+                      "Build from successful hire patterns",
+                    ],
+                  },
+                  {
+                    step: "03",
+                    title: "AI Analysis & Ranking",
+                    description:
+                      "Our proprietary algorithms analyze thousands of data points to identify the best matches and provide detailed insights on each candidate.",
+                    icon: <Brain className="h-6 w-6 text-white" />,
+                    detailPoints: [
+                      "Deep semantic understanding of job requirements",
+                      "Advanced pattern recognition in career trajectories",
+                      "Contextual skill evaluation beyond keywords",
+                    ],
+                  },
+                  {
+                    step: "04",
+                    title: "Review & Take Action",
+                    description:
+                      "Explore AI-generated shortlists and detailed candidate profiles to make informed decisions faster than ever before.",
+                    icon: <Award className="h-6 w-6 text-white" />,
+                    detailPoints: [
+                      "Visual comparison of top candidates",
+                      "One-click scheduling for interviews",
+                      "Collaborative team evaluation tools",
+                    ],
+                  },
+                ].map((item, index) => (
+                  <div key={index} className={`md:flex items-center ${index % 2 === 0 ? "" : "md:flex-row-reverse"}`}>
+                    <div className={`md:w-1/2 ${index % 2 === 0 ? "md:pr-12 md:text-right" : "md:pl-12"}`}>
+                      <motion.div
+                        initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.5 }}
+                        className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-slate-700 relative group hover:border-cyan-500/50 transition-all"
+                      >
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity" />
+                        <div className="relative">
+                          <div className="text-sm font-bold text-cyan-400 mb-2">{item.step}</div>
+                          <h3 className="text-xl font-semibold mb-3 text-white">{item.title}</h3>
+                          <p className="text-slate-300 mb-4">{item.description}</p>
+                          <ul className={`space-y-2 text-sm text-slate-400 ${index % 2 === 0 ? "md:text-right" : ""}`}>
+                            {item.detailPoints.map((point, i) => (
+                              <li key={i} className={`flex items-center ${index % 2 === 0 ? "md:justify-end" : ""}`}>
+                                <div className="h-1.5 w-1.5 rounded-full bg-cyan-400 mr-2"></div>
+                                {point}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    <div className="hidden md:flex justify-center items-center relative">
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.5 }}
+                        className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center z-10"
+                      >
+                        {item.icon}
+                      </motion.div>
+                    </div>
+
+                    <div className="md:w-1/2" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Solution Section */}
         <section id="solution" ref={solutionRef} className="py-24 relative overflow-hidden">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -705,7 +815,7 @@ export default function LandingPage() {
                 Data-Driven Talent Acquisition <span className="text-cyan-400">.</span>
               </h2>
               <p className="text-lg text-slate-300">
-                RecruitAI transforms your hiring process through advanced machine learning algorithms developed by
+                HirezApp transforms your hiring process through advanced machine learning algorithms developed by
                 expert AI engineers.
               </p>
             </motion.div>
@@ -894,7 +1004,7 @@ export default function LandingPage() {
                 <div>
                   <h3 className="text-2xl font-bold mb-4">
                     <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                      RecruitAI Transforms Your Process
+                      HirezApp Transforms Your Process
                     </span>
                   </h3>
                   <ul className="space-y-4">
@@ -1052,121 +1162,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section id="how-it-works" ref={howItWorksRef} className="py-24 bg-slate-900 relative overflow-hidden">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <Badge className="mb-4 px-3 py-1 bg-cyan-500/10 text-cyan-400 border-cyan-500/20 rounded-full">
-                Simple Process
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">How RecruitAI Works</h2>
-              <p className="text-lg text-slate-300">
-                A streamlined workflow powered by sophisticated AI that integrates seamlessly with your existing
-                processes
-              </p>
-            </div>
-
-            <div className="relative">
-              {/* Connection line */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-800 transform -translate-x-1/2 hidden md:block" />
-
-              <div className="space-y-24 md:space-y-0 relative">
-                {[
-                  {
-                    step: "01",
-                    title: "Connect Your Data Sources",
-                    description:
-                      "Integrate with LinkedIn, job boards, your ATS, or upload resumes directly. Our system handles all major formats and maintains data integrity.",
-                    icon: <Database className="h-6 w-6 text-white" />,
-                    detailPoints: [
-                      "Automatic data normalization across platforms",
-                      "Secure API connections to major job boards",
-                      "Real-time synchronization with your ATS",
-                    ],
-                  },
-                  {
-                    step: "02",
-                    title: "Define Your Ideal Candidate Profile",
-                    description:
-                      "Set up your custom requirements including must-have skills, experience levels, and cultural attributes that matter to your organization.",
-                    icon: <Users className="h-6 w-6 text-white" />,
-                    detailPoints: [
-                      "Customizable scoring criteria",
-                      "Weight different factors based on importance",
-                      "Build from successful hire patterns",
-                    ],
-                  },
-                  {
-                    step: "03",
-                    title: "AI Analysis & Ranking",
-                    description:
-                      "Our proprietary algorithms analyze thousands of data points to identify the best matches and provide detailed insights on each candidate.",
-                    icon: <Brain className="h-6 w-6 text-white" />,
-                    detailPoints: [
-                      "Deep semantic understanding of job requirements",
-                      "Advanced pattern recognition in career trajectories",
-                      "Contextual skill evaluation beyond keywords",
-                    ],
-                  },
-                  {
-                    step: "04",
-                    title: "Review & Take Action",
-                    description:
-                      "Explore AI-generated shortlists and detailed candidate profiles to make informed decisions faster than ever before.",
-                    icon: <Award className="h-6 w-6 text-white" />,
-                    detailPoints: [
-                      "Visual comparison of top candidates",
-                      "One-click scheduling for interviews",
-                      "Collaborative team evaluation tools",
-                    ],
-                  },
-                ].map((item, index) => (
-                  <div key={index} className={`md:flex items-center ${index % 2 === 0 ? "" : "md:flex-row-reverse"}`}>
-                    <div className={`md:w-1/2 ${index % 2 === 0 ? "md:pr-12 md:text-right" : "md:pl-12"}`}>
-                      <motion.div
-                        initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.5 }}
-                        className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-slate-700 relative group hover:border-cyan-500/50 transition-all"
-                      >
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity" />
-                        <div className="relative">
-                          <div className="text-sm font-bold text-cyan-400 mb-2">{item.step}</div>
-                          <h3 className="text-xl font-semibold mb-3 text-white">{item.title}</h3>
-                          <p className="text-slate-300 mb-4">{item.description}</p>
-                          <ul className={`space-y-2 text-sm text-slate-400 ${index % 2 === 0 ? "md:text-right" : ""}`}>
-                            {item.detailPoints.map((point, i) => (
-                              <li key={i} className={`flex items-center ${index % 2 === 0 ? "md:justify-end" : ""}`}>
-                                <div className="h-1.5 w-1.5 rounded-full bg-cyan-400 mr-2"></div>
-                                {point}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </motion.div>
-                    </div>
-
-                    <div className="hidden md:flex justify-center items-center relative">
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.5 }}
-                        className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center z-10"
-                      >
-                        {item.icon}
-                      </motion.div>
-                    </div>
-
-                    <div className="md:w-1/2" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Testimonials Section */}
         <section id="testimonials" ref={testimonialsRef} className="py-24 relative">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -1176,12 +1171,46 @@ export default function LandingPage() {
               animate={testimonialsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.6 }}
             >
-              <Badge className="mb-4 px-3 py-1 bg-cyan-500/10 text-cyan-400 border-cyan-500/20 rounded-full">
-                Success Stories
-              </Badge>
+              <div className="flex w-full items-center justify-center py-4">
+              <div className="flex items-center rounded-full border border-border bg-background p-1 shadow shadow-black/5 w-fit">
+      <div className="flex -space-x-1.5">
+        <img
+          className="rounded-full ring-1 ring-background"
+          src="https://originui.com/avatar-80-03.jpg"
+          width={20}
+          height={20}
+          alt="Avatar 01"
+        />
+        <img
+          className="rounded-full ring-1 ring-background"
+          src="https://originui.com/avatar-80-04.jpg"
+          width={20}
+          height={20}
+          alt="Avatar 02"
+        />
+        <img
+          className="rounded-full ring-1 ring-background"
+          src="https://originui.com/avatar-80-05.jpg"
+          width={20}
+          height={20}
+          alt="Avatar 03"
+        />
+        <img
+          className="rounded-full ring-1 ring-background"
+          src="https://originui.com/avatar-80-06.jpg"
+          width={20}
+          height={20}
+          alt="Avatar 04"
+        />
+      </div>
+      <p className="px-2 text-xs text-muted-foreground">
+        Trusted by <strong className="font-medium text-foreground">60K+</strong> developers.
+      </p>
+    </div>
+              </div>
               <h2 className="text-3xl md:text-4xl font-bold mb-6">What Our Customers Say</h2>
               <p className="text-lg text-slate-300">
-                Hear from HR leaders and executives who have transformed their hiring process with RecruitAI
+                Hear from HR leaders and executives who have transformed their hiring process with HirezApp
               </p>
             </motion.div>
 
@@ -1229,7 +1258,7 @@ export default function LandingPage() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" ref={pricingRef} className="py-24 bg-slate-900 relative overflow-hidden">
+        <section id="pricing" ref={pricingRef} className="py-24  relative overflow-hidden">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div
               className="text-center max-w-3xl mx-auto mb-16"
@@ -1325,7 +1354,7 @@ export default function LandingPage() {
                 Ready to Transform Your Hiring Process?
               </h2>
               <p className="text-xl text-slate-300 mb-8">
-                Join hundreds of forward-thinking companies using RecruitAI to build exceptional teams faster and more
+                Join hundreds of forward-thinking companies using HirezApp to build exceptional teams faster and more
                 effectively.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -1411,7 +1440,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  RecruitAI
+                  HirezApp
                 </span>
               </Link>
               <p className="text-slate-400 text-sm mb-4">
@@ -1484,7 +1513,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-slate-500 text-sm">&copy; {new Date().getFullYear()} RecruitAI. All rights reserved.</p>
+            <p className="text-slate-500 text-sm">&copy; {new Date().getFullYear()} HirezApp. All rights reserved.</p>
             <div className="mt-4 md:mt-0">
               <ul className="flex space-x-6">
                 {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (

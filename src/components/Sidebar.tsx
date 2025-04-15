@@ -18,7 +18,7 @@ const Sidebar = () => {
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: Home },
     { name: "Forms", href: "/admin/forms", icon: FileText },
-    { name: "Applicants", href: "/admin/applicants", icon: Users },
+    { name: "Applications", href: "/admin/applications", icon: Users },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 

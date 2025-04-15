@@ -11,7 +11,7 @@ const CTASection = () => {
             Ready to Transform Your Hiring Process?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Join hundreds of companies using RecruitAI to find the best talent
+            Join hundreds of companies using HirezApp to find the best talent
             efficiently.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

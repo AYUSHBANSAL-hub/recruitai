@@ -49,7 +49,7 @@ const HeroSection = () => {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold mb-6 text-black">
-            Welcome to <span className="gradient-text">RecruitAI</span>
+            Welcome to <span className="gradient-text">HirezApp</span>
           </h1>
 
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
