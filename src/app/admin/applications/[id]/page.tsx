@@ -84,8 +84,8 @@ export default function ApplicationDetail() {
     )
   }
 
-  const candidateName = application.responses["fixed-name"] || "Candidate"
-  const candidateEmail = application.responses["fixed-email"] || ""
+  const candidateName = application.responses["Full Name"] || application.responses["fixed-name"] || "Candidate"
+  const candidateEmail = application.responses["Email Address"] || application.responses["fixed-email"] || ""
 
   return (
     <div className="max-w-4xl mx-auto p-6">

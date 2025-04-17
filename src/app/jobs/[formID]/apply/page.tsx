@@ -70,7 +70,7 @@ export default function ApplyForm() {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [success, setSuccess] = useState(false);
   const [submittedStatus, setSubmittedStatus] = useState(false);
-
+console.log(responses)
   useEffect(() => {
     if (params) {
       setFormId(params.formID);
@@ -99,7 +99,7 @@ export default function ApplyForm() {
         // Initialize responses object with empty values
         const initialResponses: { [key: string]: string } = {};
         data.fields.forEach((field: any) => {
-          initialResponses[field.id] = "";
+          initialResponses[field.label] = "";
         });
         setResponses(initialResponses);
       } catch (err: any) {
@@ -112,13 +112,13 @@ export default function ApplyForm() {
     fetchForm();
   }, [formId]);
 
-  const handleChange = (fieldId: string, value: string) => {
-    setResponses({ ...responses, [fieldId]: value });
+  const handleChange = (fieldLabel: string, value: string) => {
+    setResponses({ ...responses, [fieldLabel]: value });
 
     // Clear error for this field if it exists
-    if (formErrors[fieldId]) {
+    if (formErrors[fieldLabel]) {
       const newErrors = { ...formErrors };
-      delete newErrors[fieldId];
+      delete newErrors[fieldLabel];
       setFormErrors(newErrors);
     }
   };
@@ -222,9 +222,9 @@ export default function ApplyForm() {
     form?.fields.forEach((field) => {
       if (
         field.required && field.id!="fixed-resume" &&
-        (!responses[field.id] || responses[field.id].trim() === "")
+        (!responses[field.label] || responses[field.label].trim() === "")
       ) {
-        errors[field.id] = `${field.label} is required`;
+        errors[field.label] = `${field.label} is required`;
         isValid = false;
       }
     });
@@ -466,9 +466,9 @@ export default function ApplyForm() {
                         id={field.id}
                         type="text"
                         required={field.required}
-                        value={responses[field.id] || ""}
-                        onChange={(e) => handleChange(field.id, e.target.value)}
-                        className={formErrors[field.id] ? "border-red-500" : ""}
+                        value={responses[field.label] || ""}
+                        onChange={(e) => handleChange(field.label, e.target.value)}
+                        className={formErrors[field.label] ? "border-red-500" : ""}
                         placeholder={`Enter your ${field.label.toLowerCase()}`}
                       />
                     )}
@@ -478,9 +478,9 @@ export default function ApplyForm() {
                         id={field.id}
                         type="email"
                         required={field.required}
-                        value={responses[field.id] || ""}
-                        onChange={(e) => handleChange(field.id, e.target.value)}
-                        className={formErrors[field.id] ? "border-red-500" : ""}
+                        value={responses[field.label] || ""}
+                        onChange={(e) => handleChange(field.label, e.target.value)}
+                        className={formErrors[field.label] ? "border-red-500" : ""}
                         placeholder={`Enter your ${field.label.toLowerCase()}`}
                       />
                     )}
@@ -490,9 +490,9 @@ export default function ApplyForm() {
                         id={field.id}
                         type="tel"
                         required={field.required}
-                        value={responses[field.id] || ""}
-                        onChange={(e) => handleChange(field.id, e.target.value)}
-                        className={formErrors[field.id] ? "border-red-500" : ""}
+                        value={responses[field.label] || ""}
+                        onChange={(e) => handleChange(field.label, e.target.value)}
+                        className={formErrors[field.label] ? "border-red-500" : ""}
                         placeholder="e.g., +1 (555) 123-4567"
                       />
                     )}
@@ -501,9 +501,9 @@ export default function ApplyForm() {
                       <Textarea
                         id={field.id}
                         required={field.required}
-                        value={responses[field.id] || ""}
-                        onChange={(e) => handleChange(field.id, e.target.value)}
-                        className={formErrors[field.id] ? "border-red-500" : ""}
+                        value={responses[field.label] || ""}
+                        onChange={(e) => handleChange(field.label, e.target.value)}
+                        className={formErrors[field.label] ? "border-red-500" : ""}
                         placeholder={`Enter your ${field.label.toLowerCase()}`}
                         rows={4}
                       />
@@ -511,12 +511,12 @@ export default function ApplyForm() {
 
                     {field.type === "select" && field.options && (
                       <Select
-                        value={responses[field.id] || ""}
-                        onValueChange={(value) => handleChange(field.id, value)}
+                        value={responses[field.label] || ""}
+                        onValueChange={(value) => handleChange(field.label, value)}
                       >
                         <SelectTrigger
                           className={
-                            formErrors[field.id] ? "border-red-500" : ""
+                            formErrors[field.label] ? "border-red-500" : ""
                           }
                         >
                           <SelectValue
@@ -602,9 +602,9 @@ export default function ApplyForm() {
                         </div>
                       )}
 
-                    {formErrors[field.id] && (
+                    {formErrors[field.label] && (
                       <p className="text-sm text-red-500">
-                        {formErrors[field.id]}
+                        {formErrors[field.label]}
                       </p>
                     )}
                   </div>

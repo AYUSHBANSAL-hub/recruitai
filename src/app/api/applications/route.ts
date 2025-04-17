@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({ formId, responses, resumeUrl }),
     });
-    await sendApplicationSubmittedEmail(responses["fixed-email"], responses["fixed-name"], formTitle);
+    await sendApplicationSubmittedEmail(responses["Email Address"], responses["Full Name"], formTitle);
 
     return NextResponse.json({ status: 201 });
   } catch (error) {

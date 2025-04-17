@@ -25,8 +25,8 @@ export async function PATCH(
     });
 
     // Extract candidate name and email from responses
-    const candidateName = application.responses["fixed-name"] || "Candidate";
-    const candidateEmail = application.responses["fixed-email"];
+    const candidateName = application.responses["Full Name"] || application.responses["fixed-name"] || "Candidate";
+    const candidateEmail = application.responses["Email Address"] || application.responses["fixed-email"];
     const jobTitle = application.form.title || "Position";
 
     // Format application date

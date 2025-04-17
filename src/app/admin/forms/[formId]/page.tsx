@@ -504,7 +504,7 @@ export default function ApplicationsList() {
                               <div className="flex items-center gap-3">
                                 <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-semibold">
                                   {app.responses
-                                    ? app.responses["fixed-name"]
+                                    ? (app.responses["Full Name"] || app.responses["fixed-name"])
                                         .charAt(0)
                                         .toUpperCase()
                                     : "A"}
@@ -512,8 +512,7 @@ export default function ApplicationsList() {
                                 <div>
                                   <p className="font-medium text-gray-900">
                                     {app.responses
-                                      ? app.responses["fixed-name"] ||
-                                        "Anonymous Candidate"
+                                      ? app.responses["Full Name"] || app.responses["fixed-name"] || "Anonymous Candidate"
                                       : "Anonymous Candidate"}
                                   </p>
                                   <p className="text-xs text-gray-500">
@@ -760,13 +759,12 @@ export default function ApplicationsList() {
                                       <CalendarIntegration
                                         candidateName={
                                           app.responses
-                                            ? app.responses["fixed-name"] ||
-                                              "Anonymous Candidate"
+                                            ? app.responses["Full Name"] || app.responses["fixed-name"] || "Anonymous Candidate"
                                             : "Anonymous Candidate"
                                         }
                                         candidateEmail={
                                           app.responses
-                                            ? app.responses["fixed-email"] || ""
+                                            ? app.responses["Email Address"] || app.responses["fixed-email"] || ""
                                             : ""
                                         }
                                         jobTitle={"Unknown Position"}

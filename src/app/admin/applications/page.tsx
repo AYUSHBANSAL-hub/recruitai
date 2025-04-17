@@ -305,13 +305,14 @@ function ApplicationsList() {
       "fullName",
       "candidateName",
       "full_name",
-      "fixed-name",
+      "Full Name",
+      "fixed-name"
     ];
     for (const field of nameFields) {
       if (app.responses[field]) return app.responses[field];
     }
     return (
-      (app.responses && app.responses["fixed-name"]) || "Anonymous Candidate"
+      (app.responses && app.responses["Full Name"]) || "Anonymous Candidate"
     );
   };
 
@@ -321,13 +322,14 @@ function ApplicationsList() {
       "email",
       "emailAddress",
       "candidate_email",
-      "fixed-email",
+      "Email Address",
+      "fixed-email"
     ];
     for (const field of emailFields) {
       if (app.responses[field]) return app.responses[field];
     }
     return (
-      (app.responses && app.responses["fixed-email"]) || "No email provided"
+      (app.responses && app.responses["Email Address"]) || "No email provided"
     );
   };
 
@@ -922,8 +924,8 @@ const exportToCSV = (applications: Application[]) => {
     "Applied Date",
   ];
   const rows = applications.map((app) => [
-    app.responses["fixed-name"] || "Anonymous",
-    app.responses["fixed-email"] || "N/A",
+    app.responses["Full Name"] || "Anonymous",
+    app.responses["Email Address"] || "N/A",
     app.matchScore !== null ? `${app.matchScore}%` : "N/A",
     app.status,
     app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "N/A",

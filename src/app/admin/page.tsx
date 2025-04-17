@@ -634,11 +634,11 @@ export default function AdminDashboard() {
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-3">
                               <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-semibold">
-                                {app.responses && app.responses["fixed-name"]
-                                  ? app.responses["fixed-name"].charAt(0).toUpperCase()
+                                {app.responses && (app.responses["Full Name"] || app.responses["fixed-name"])
+                                  ? (app.responses["Full Name"] || app.responses["fixed-name"]).charAt(0).toUpperCase()
                                   : "A"}
                               </div>
-                              <span>{app.responses && app.responses["fixed-name"] || "Anonymous Candidate"}</span>
+                              <span>{app.responses?.["Full Name"] || app.responses?.["fixed-name"] || "Anonymous Candidate"}</span>
                             </div>
                           </TableCell>
                           <TableCell>
