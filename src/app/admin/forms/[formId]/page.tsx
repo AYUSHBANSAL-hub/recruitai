@@ -15,6 +15,9 @@ import {
   AlertTriangle,
   MessageSquare,
   Sparkle,
+  RefreshCw,
+  Delete,
+  TrashIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -49,7 +52,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
-import CalendarIntegration from "@/components/CalendarIntegration"
+import CalendarIntegration from "@/components/CalendarIntegration";
 
 interface Application {
   id: string;
@@ -94,10 +97,11 @@ export default function ApplicationsList() {
       try {
         const [applicationsRes, formRes] = await Promise.all([
           fetch(`/api/applications?formId=${formId}`),
-          fetch(`/api/forms/${formId}`)
+          fetch(`/api/forms/${formId}`),
         ]);
 
-        if (!applicationsRes.ok) throw new Error("Failed to fetch applications");
+        if (!applicationsRes.ok)
+          throw new Error("Failed to fetch applications");
         if (!formRes.ok) throw new Error("Failed to fetch form data");
         const formData = await formRes.json();
         setForm(formData);
@@ -258,9 +262,7 @@ export default function ApplicationsList() {
             <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200 mb-2">
               {"Job Title"}
             </Badge>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {form?.title}
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900">{form?.title}</h1>
             <p className="text-gray-500 mt-1">
               Review and manage candidate applications
             </p>
@@ -457,10 +459,12 @@ export default function ApplicationsList() {
                   <Table>
                     <TableHeader className="bg-gray-50">
                       <TableRow>
-                        <TableHead className="w-[200px] font-semibold">
+                        <TableHead className="w-[200px] font-semibold text-center">
                           Candidate
                         </TableHead>
-                        <TableHead className="font-semibold">Resume</TableHead>
+                        <TableHead className="font-semibold text-center">
+                          Resume
+                        </TableHead>
                         <TableHead
                           className="cursor-pointer font-semibold"
                           onClick={toggleSort}
@@ -475,11 +479,21 @@ export default function ApplicationsList() {
                               ))}
                           </div>
                         </TableHead>
-                        <TableHead className="font-semibold">
+                        <TableHead className="font-semibold text-center">
                           AI Insights
                         </TableHead>
-                        <TableHead className="font-semibold">Status</TableHead>
-                        <TableHead className="font-semibold">Actions</TableHead>
+                        <TableHead className="font-semibold text-center">
+                          Actions
+                        </TableHead>
+                        <TableHead className="font-semibold text-center">
+                          Status
+                        </TableHead>
+                        <TableHead className="font-semibold text-center">
+                          ReAnalyse
+                        </TableHead>
+                        <TableHead className="font-semibold text-center">
+                          Delete
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -508,18 +522,18 @@ export default function ApplicationsList() {
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               <a
                                 href={app.resumeUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 font-medium"
+                                className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 font-medium justify-center"
                               >
                                 <FileText className="h-4 w-4" />
                                 View Resume
                               </a>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -562,12 +576,12 @@ export default function ApplicationsList() {
                                 </Tooltip>
                               </TooltipProvider>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               <Button
-                                variant="outline"
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => toggleRowExpansion(app.id)}
-                                className={`text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-gray-900 ${
+                                className={`text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-blue-500 cursor-pointer ${
                                   expandedRows[app.id] ? "bg-gray-50" : ""
                                 }`}
                               >
@@ -577,8 +591,7 @@ export default function ApplicationsList() {
                                   : "View Details"}
                               </Button>
                             </TableCell>
-                            <TableCell>{getStatusBadge(app.status)}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button
@@ -586,11 +599,11 @@ export default function ApplicationsList() {
                                     size="sm"
                                     className="border-gray-300 text-gray-700 hover:bg-gray-50"
                                   >
-                                    Update Status
+                                    Update Status <ChevronDown/>
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent
-                                  align="end"
+                                  align="start"
                                   className="bg-white border border-gray-200 shadow-lg rounded-lg p-1"
                                 >
                                   <DropdownMenuItem
@@ -623,10 +636,32 @@ export default function ApplicationsList() {
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </TableCell>
+                            <TableCell className="text-center">
+                              {getStatusBadge(app.status)}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="hover:bg-gray-100"
+                                disabled={app.matchScore != null}
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                <TrashIcon className="h-5 w-5" />
+                              </Button>
+                            </TableCell>
                           </TableRow>
                           {expandedRows[app.id] && (
                             <TableRow className="bg-gray-50 border-b border-gray-200">
-                              <TableCell colSpan={6} className="p-0">
+                              <TableCell colSpan={8} className="p-0">
                                 <div className="p-6 space-y-4">
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <Card className="bg-white border-emerald-100 shadow-sm overflow-hidden">
@@ -720,30 +755,25 @@ export default function ApplicationsList() {
                                       </p>
                                     </CardContent>
                                   </Card>
-                                  {app &&
-                                    app.status === "SHORTLISTED" &&
-                                    (
-                                      <div className="mt-4">
-                                        <CalendarIntegration
-                                          candidateName={
-                                            app.responses
-                                              ? app.responses["fixed-name"] ||
-                                                "Anonymous Candidate"
-                                              : "Anonymous Candidate"
-                                          }
-                                          candidateEmail={
-                                            app.responses
-                                              ? app.responses["fixed-email"] ||
-                                                ""
-                                              : ""
-                                          }
-                                          jobTitle={
-                                             "Unknown Position"
-                                          }
-                                          provider="cal"
-                                        />
-                                      </div>
-                                    )}
+                                  {app && app.status === "SHORTLISTED" && (
+                                    <div className="mt-4">
+                                      <CalendarIntegration
+                                        candidateName={
+                                          app.responses
+                                            ? app.responses["fixed-name"] ||
+                                              "Anonymous Candidate"
+                                            : "Anonymous Candidate"
+                                        }
+                                        candidateEmail={
+                                          app.responses
+                                            ? app.responses["fixed-email"] || ""
+                                            : ""
+                                        }
+                                        jobTitle={"Unknown Position"}
+                                        provider="cal"
+                                      />
+                                    </div>
+                                  )}
                                 </div>
                               </TableCell>
                             </TableRow>

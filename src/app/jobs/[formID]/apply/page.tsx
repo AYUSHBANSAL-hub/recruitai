@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Clock,
   Building,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { sendApplicationSubmittedEmail } from "../../../../../lib/email";
+import { PDFDocument } from 'pdf-lib';
 
 interface Form {
   id: string;
@@ -120,9 +122,19 @@ export default function ApplyForm() {
       setFormErrors(newErrors);
     }
   };
+  const validateFile = async (file: File) => {
+    if (!file || file.type !== 'application/pdf') {
+      throw new Error("Invalid file");
+    }
+  
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(arrayBuffer);
+    const pageCount = pdfDoc.getPageCount();
+  
+    return pageCount <= 2; // Returns true if 2 pages or less
+  }
 
-  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
 
@@ -143,6 +155,17 @@ export default function ApplyForm() {
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         setResumeError("File size must be less than 5MB");
+        return;
+      }
+
+      try {
+        const isValid = await validateFile(file);
+        if (!isValid) {
+          setResumeError("Please upload a PDF with max 2 pages");
+          return;
+        }
+      } catch (error) {
+        setResumeError("Error validating PDF file");
         return;
       }
 
@@ -313,6 +336,38 @@ export default function ApplyForm() {
         </Card>
       </div>
     );
+  }
+  if (form && form.active === false) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-red-100">
+          <CardHeader className="text-center">
+            <div className="mx-auto bg-red-100 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+              <XCircle className="h-8 w-8 text-red-600" />
+            </div>
+            <CardTitle className="text-2xl text-red-600">Application Closed</CardTitle>
+            <CardDescription className="mt-2">
+              We're sorry, but this job application form has been closed and is no longer accepting submissions.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+              <AlertCircle className="h-4 w-4 text-amber-800" />
+              <AlertTitle>Please note</AlertTitle>
+              <AlertDescription>
+                If you believe this is an error or would like more information about this position, please contact the
+                job poster directly.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button variant="outline" onClick={() => router.push("/")}>
+              Return to Home
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -520,7 +575,7 @@ export default function ApplyForm() {
                               <Input
                                 id="resume-upload"
                                 type="file"
-                                accept=".pdf,.doc,.docx"
+                                accept=".pdf"
                                 onChange={handleResumeUpload}
                                 className="hidden"
                               />
@@ -606,7 +661,7 @@ export default function ApplyForm() {
                         <Input
                           id="resume-upload"
                           type="file"
-                          accept=".pdf,.doc,.docx"
+                          accept=".pdf"
                           onChange={handleResumeUpload}
                           className="hidden"
                         />

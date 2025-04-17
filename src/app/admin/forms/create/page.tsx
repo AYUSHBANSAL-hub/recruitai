@@ -39,17 +39,21 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { FormField } from "../../../../lib/formGenerator"
+import {
+  Stepper,
+  StepperDescription,
+  StepperIndicator,
+  StepperItem,
+  StepperSeparator,
+  StepperTitle,
+  StepperTrigger,
+} from "@/components/ui/stepper";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false })
 import "react-quill-new/dist/quill.snow.css"
 
 // Hiring domain types
 type HiringDomain = "tech" | "non-tech" | "sales" | ""
-
-const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-}
 
 // Fixed fields that will always be included
 const fixedFields: FormField[] = [
@@ -135,7 +139,7 @@ const salesFields: FormField[] = [
 ]
 
 // Quill editor modules and formats
-const quillModules = {
+export const quillModules = {
   toolbar: [
     [{ header: [1, 2, 3, 4, 5, 6, false] }],
     ["bold", "italic", "underline", "strike"],
@@ -146,7 +150,7 @@ const quillModules = {
   ],
 }
 
-const quillFormats = ["header", "bold", "italic", "underline", "strike", "list", "indent", "link"]
+export const quillFormats = ["header", "bold", "italic", "underline", "strike", "list", "indent", "link"]
 
 export default function CreateForm() {
   const router = useRouter()
@@ -155,6 +159,7 @@ export default function CreateForm() {
   const [customFields, setCustomFields] = useState<FormField[]>([])
   const [error, setError] = useState("")
   const [activeTab, setActiveTab] = useState("details")
+  const [activeStep, setActiveStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hiringDomain, setHiringDomain] = useState<HiringDomain>("")
   const [domainFields, setDomainFields] = useState<FormField[]>([])
@@ -641,23 +646,40 @@ export default function CreateForm() {
             <p className="text-red-700">{error}</p>
           </motion.div>
         )}
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6">
-            <TabsTrigger value="details" className="text-sm">
-              Job Details
-            </TabsTrigger>
-            <TabsTrigger value="fields" className="text-sm">
-              Application Fields
-            </TabsTrigger>
-            <TabsTrigger value="preview" className="text-sm">
-              Form Preview
-            </TabsTrigger>
-          </TabsList>
-
+        <Stepper value={activeStep} onValueChange={setActiveStep} className="w-full pb-6">
+              <StepperItem step={0} className="flex-1">
+                <StepperTrigger className="flex flex-col items-center gap-1">
+                  <StepperIndicator />
+                  <div className="flex flex-col items-center">
+                    <StepperTitle>Job Details</StepperTitle>
+                    <StepperDescription>Select the Domain</StepperDescription>
+                  </div>
+                </StepperTrigger>
+                <StepperSeparator />
+              </StepperItem>
+              <StepperItem step={1} className="flex-1">
+                <StepperTrigger className="flex flex-col items-center gap-1">
+                  <StepperIndicator />
+                  <div className="flex flex-col items-center">
+                    <StepperTitle>Application Fields</StepperTitle>
+                    <StepperDescription>Field for hiring</StepperDescription>
+                  </div>
+                </StepperTrigger>
+                <StepperSeparator />
+              </StepperItem>
+              <StepperItem step={2}>
+                <StepperTrigger className="flex flex-col items-center gap-1">
+                  <StepperIndicator />
+                  <div className="flex flex-col items-center">
+                    <StepperTitle>Form Preview</StepperTitle>
+                    <StepperDescription>Form layout</StepperDescription>
+                  </div>
+                </StepperTrigger>
+              </StepperItem>
+            </Stepper>
           <form onSubmit={handleSubmit}>
-            <TabsContent value="details">
-              <Card>
+              {activeStep==0 && (
+                <Card>
                 <CardHeader>
                   <CardTitle>Job Details</CardTitle>
                   <CardDescription>Enter the basic information about the job position</CardDescription>
@@ -752,7 +774,7 @@ export default function CreateForm() {
                   <div className="flex justify-end pt-4">
                     <Button
                       type="button"
-                      onClick={() => setActiveTab("fields")}
+                      onClick={() => setActiveStep(1)}
                       className="bg-indigo-600 hover:bg-indigo-700 text-white"
                     >
                       Continue to Application Fields
@@ -760,10 +782,9 @@ export default function CreateForm() {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-
-            <TabsContent value="fields">
-              <Card>
+              )}
+              {activeStep==1 && (
+                <Card>
                 <CardHeader>
                   <CardTitle>Application Fields</CardTitle>
                   <CardDescription>
@@ -1012,12 +1033,12 @@ export default function CreateForm() {
                   </div>
 
                   <div className="flex justify-between pt-4">
-                    <Button type="button" variant="outline" onClick={() => setActiveTab("details")}>
+                    <Button type="button" variant="outline" onClick={() => setActiveStep(0)}>
                       Back to Job Details
                     </Button>
                     <Button
                       type="button"
-                      onClick={() => setActiveTab("preview")}
+                      onClick={() => setActiveStep(2)}
                       className="bg-indigo-600 hover:bg-indigo-700 text-white"
                     >
                       Preview Form
@@ -1025,10 +1046,9 @@ export default function CreateForm() {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-
-            <TabsContent value="preview">
-              <Card>
+              )}
+              {activeStep==2 && (
+                <Card>
                 <CardHeader>
                   <CardTitle>Form Preview</CardTitle>
                   <CardDescription>Preview how your application form will appear to candidates</CardDescription>
@@ -1092,7 +1112,7 @@ export default function CreateForm() {
                   </div>
 
                   <div className="flex justify-between pt-4">
-                    <Button type="button" variant="outline" onClick={() => setActiveTab("fields")}>
+                    <Button type="button" variant="outline" onClick={() => setActiveStep(1)}>
                       Back to Fields
                     </Button>
                     <Button
@@ -1115,9 +1135,8 @@ export default function CreateForm() {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+              )}
           </form>
-        </Tabs>
       </div>
     </div>
   )

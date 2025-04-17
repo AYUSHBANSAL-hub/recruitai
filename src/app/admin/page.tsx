@@ -18,6 +18,7 @@ import {
   CopyCheck,
   MoreHorizontal,
   Power,
+  PenLine,
 } from "lucide-react";
 import {
   Card,
@@ -41,6 +42,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import EditJobDescriptionModal from "@/components/EditJobDescriptionModal";
 
 interface Form {
   id: string;
@@ -48,6 +50,7 @@ interface Form {
   createdAt: string;
   active: boolean;
   applicationsCount?: number;
+  jobDescription?: string;
 }
 
 interface Application {
@@ -92,6 +95,9 @@ export default function AdminDashboard() {
     shortlisted: 0,
     rejected: 0,
   });
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -236,6 +242,26 @@ export default function AdminDashboard() {
         return <Badge variant="outline">Unknown</Badge>;
     }
   };
+  const updateJobDesc = async (value: string, formId: string) => {
+    try {
+      const response = await fetch(`/api/forms/${formId}/updateJobDescription`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobDescription: value }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update job description');
+      }
+
+      toast.success('Job description updated successfully');
+    } catch (error) {
+      console.error('Error updating job description:', error);
+      toast.error('Failed to update job description');
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -395,13 +421,10 @@ export default function AdminDashboard() {
                         Job Title
                       </TableHead>
                       <TableHead className="font-semibold text-center">
-                        Created
+                        Date Created
                       </TableHead>
                       <TableHead className="font-semibold text-center">
                         Applications
-                      </TableHead>
-                      <TableHead className="font-semibold text-center">
-                        Status
                       </TableHead>
                       <TableHead className="font-semibold text-center">
                         Actions
@@ -410,7 +433,10 @@ export default function AdminDashboard() {
                         Form Links
                       </TableHead>
                       <TableHead className="font-semibold text-center">
-                        Action
+                        Edit
+                      </TableHead>
+                      <TableHead className="font-semibold text-center">
+                        Status
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -441,17 +467,6 @@ export default function AdminDashboard() {
                             <Users className="h-4 w-4 text-gray-400" />
                             <span>{form.applicationsCount || 0}</span>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            className={`${
-                              form.active
-                                ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                                : "bg-gray-100 text-gray-800 border-gray-200"
-                            }`}
-                          >
-                            {form.active ? "Active" : "Inactive"}
-                          </Badge>
                         </TableCell>
                         <TableCell>
                           <Button
@@ -507,7 +522,44 @@ export default function AdminDashboard() {
                   </div>
                 </TableCell>
                 <TableCell>
-                    <div className="flex items-center justify-center">
+                <EditJobDescriptionModal
+                  initialContent={form.jobDescription || ""}
+                  onSave={(value) => updateJobDesc(value, form.id)}
+                  open={editModalOpen && selectedFormId === form.id}
+                  onOpenChange={(open) => {
+                    setEditModalOpen(open);
+                    if (open) {
+                      setSelectedFormId(form.id);
+                    } else {
+                      setSelectedFormId(null);
+                    }
+                  }}
+                  trigger={
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-indigo-600 hover:bg-indigo-50"
+                      onClick={() => {
+                        setSelectedFormId(form.id);
+                        setEditModalOpen(true);
+                      }}
+                    >
+                      <PenLine className="h-5 w-5" />
+                    </Button>
+                  }
+                />
+                </TableCell>
+                <TableCell>
+                    <div className="flex items-center justify-center gap-2">
+                    <Badge
+                            className={`${
+                              form.active
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                                : "bg-gray-100 text-gray-800 border-gray-200"
+                            }`}
+                          >
+                            {form.active ? "Active" : "Inactive"}
+                          </Badge>
                       {loadingId === form.id ? (
                         <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-brand-600"></div>
                       ) : (
