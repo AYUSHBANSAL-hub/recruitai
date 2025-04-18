@@ -4,14 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, ExternalLink, Calendar, CheckCircle, XCircle } from "lucide-react";
-
-interface Form {
-  id: string;
-  title: string;
-  jobDescription: string;
-  createdAt: string;
-  active: boolean;
-}
+import { JobForm } from "@/types";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -95,7 +88,7 @@ export default function FormsList() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {forms.map((form: Form) => (
+                  {forms.map((form: JobForm) => (
                     <motion.tr
                       key={form.id}
                       initial={{ opacity: 0 }}

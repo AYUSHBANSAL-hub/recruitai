@@ -4,27 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import {
-  AlertCircle,
-  ArrowRight,
-  ArrowLeft,
-  CheckCircle,
-  User,
-  Building2,
-  Briefcase,
-  Lock,
-  Mail,
-  UserCircle,
-  Phone,
-  Globe,
-  Users,
-  BarChart,
-  CheckCheck,
-  TrendingUp,
-  Brain,
-  Clock,
-  Award,
-} from "lucide-react"
+import { AlertCircle, ArrowRight, ArrowLeft, CheckCircle, User, Building2, Briefcase, Lock, Mail, UserCircle, Phone, Globe, Users, BarChart, CheckCheck, TrendingUp, Brain, Clock, Award} from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,6 +12,9 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
+import { statsData, testimonials, steps, industries,companySizes, departments, stepBenefits} from "@/constants/signup"
+import * as React from "react"
+import { CheckedState } from "@radix-ui/react-checkbox"
 
 // Animation variants
 const fadeIn = {
@@ -40,131 +23,34 @@ const fadeIn = {
   exit: { opacity: 0, y: -10 },
 }
 
-const slideIn = {
-  initial: { opacity: 0, x: 20 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -20 },
+interface FormData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  companyName: string;
+  companyWebsite: string;
+  industry: string;
+  companySize: string;
+  jobTitle: string;
+  department: string;
+  recruitmentChallenges: string[];
+  acceptTerms: boolean;
 }
 
-// Form steps
-const steps = [
-  { id: 1, title: "Account", icon: <User className="h-5 w-5" /> },
-  { id: 2, title: "Personal", icon: <UserCircle className="h-5 w-5" /> },
-  { id: 3, title: "Company", icon: <Building2 className="h-5 w-5" /> },
-  { id: 4, title: "Role", icon: <Briefcase className="h-5 w-5" /> },
-  { id: 5, title: "Complete", icon: <CheckCheck className="h-5 w-5" /> },
-]
+interface FormEvent extends React.FormEvent<HTMLFormElement> {
+  target: HTMLFormElement;
+}
 
-// Industry options
-const industries = [
-  "Technology",
-  "Healthcare",
-  "Finance",
-  "Education",
-  "Manufacturing",
-  "Retail",
-  "Hospitality",
-  "Construction",
-  "Transportation",
-  "Energy",
-  "Media & Entertainment",
-  "Professional Services",
-  "Other",
-]
+interface InputEvent extends React.ChangeEvent<HTMLInputElement> {
+  target: HTMLInputElement;
+}
 
-// Company size options
-const companySizes = [
-  "1-10 employees",
-  "11-50 employees",
-  "51-200 employees",
-  "201-500 employees",
-  "501-1000 employees",
-  "1001-5000 employees",
-  "5001+ employees",
-]
-
-// Department options
-const departments = [
-  "Human Resources",
-  "Talent Acquisition",
-  "Executive Leadership",
-  "Operations",
-  "Administration",
-  "Other",
-]
-
-// Benefits for each step
-const stepBenefits = [
-  {
-    step: 1,
-    title: "Secure & Personalized",
-    description: "Your account is the gateway to AI-powered recruitment that saves 76% of screening time",
-    icon: <Lock className="h-6 w-6 text-white" />,
-    stat: "100% secure data",
-  },
-  {
-    step: 2,
-    title: "Tailored Experience",
-    description: "We customize your experience based on your role and recruitment needs",
-    icon: <UserCircle className="h-6 w-6 text-white" />,
-    stat: "95% match accuracy",
-  },
-  {
-    step: 3,
-    title: "Industry Insights",
-    description: "Gain access to recruitment benchmarks specific to your industry and company size",
-    icon: <Building2 className="h-6 w-6 text-white" />,
-    stat: "Industry-specific data",
-  },
-  {
-    step: 4,
-    title: "Role-Based Solutions",
-    description: "Your challenges inform our AI to deliver the most relevant candidate matches",
-    icon: <Briefcase className="h-6 w-6 text-white" />,
-    stat: "41% faster hiring",
-  },
-]
-
-// Testimonials
-const testimonials = [
-  {
-    quote: "HirezApp cut our screening time by 89% and improved our quality of hires dramatically.",
-    author: "Sarah J.",
-    role: "Head of Talent Acquisition",
-  },
-  {
-    quote: "The AI found patterns in successful employees that we hadn't noticed ourselves.",
-    author: "Michael C.",
-    role: "CTO",
-  },
-  {
-    quote: "We increased our diversity hiring by surfacing qualified candidates we would have missed.",
-    author: "Emily R.",
-    role: "VP of HR",
-  },
-]
-
-// Stats data for carousel
-const statsData = [
-  {
-    icon: <Clock className="h-8 w-8 text-white" />,
-    value: "76%",
-    label: "Reduction in screening time",
-    bgClass: "from-blue-600 to-blue-800 border-blue-500/30",
-  },
-  {
-    icon: <TrendingUp className="h-8 w-8 text-white" />,
-    value: "3.5x",
-    label: "Increase in qualified candidates",
-    bgClass: "from-cyan-600 to-cyan-800 border-cyan-500/30",
-  },
-  {
-    icon: <Brain className="h-8 w-8 text-white" />,
-    value: "95%",
-    label: "AI matching accuracy",
-    bgClass: "from-indigo-600 to-indigo-800 border-indigo-500/30",
-  },
-]
+interface SelectEvent extends React.ChangeEvent<HTMLSelectElement> {
+  target: HTMLSelectElement;
+}
 
 export default function SignUp() {
   const router = useRouter()
@@ -176,7 +62,7 @@ export default function SignUp() {
   const [currentStat, setCurrentStat] = useState(0)
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     // Account details
     email: "",
     password: "",
@@ -224,7 +110,7 @@ export default function SignUp() {
   }, [])
 
   // Handle form input changes
-  const handleChange = (e) => {
+  const handleChange = (e: InputEvent) => {
     const { name, value, type, checked } = e.target
     setFormData({
       ...formData,
@@ -233,7 +119,7 @@ export default function SignUp() {
   }
 
   // Handle select changes
-  const handleSelectChange = (name, value) => {
+  const handleSelectChange = (name: string, value: string) => {
     setFormData({
       ...formData,
       [name]: value,
@@ -241,19 +127,22 @@ export default function SignUp() {
   }
 
   // Handle checkbox array changes
-  const handleCheckboxArrayChange = (value, checked) => {
-    if (checked) {
-      setFormData({
-        ...formData,
-        recruitmentChallenges: [...formData.recruitmentChallenges, value],
-      })
-    } else {
-      setFormData({
-        ...formData,
-        recruitmentChallenges: formData.recruitmentChallenges.filter((item) => item !== value),
-      })
-    }
-  }
+  const handleCheckboxArrayChange = (value: string, checked: CheckedState) => {
+    setFormData({
+      ...formData,
+      recruitmentChallenges: checked === true
+        ? [...formData.recruitmentChallenges, value]
+        : formData.recruitmentChallenges.filter((challenge) => challenge !== value),
+    });
+  };
+
+  // Handle checkbox changes
+  const handleCheckboxChange = (checked: CheckedState) => {
+    setFormData({
+      ...formData,
+      acceptTerms: checked === true,
+    });
+  };
 
   // Navigate to next step
   const nextStep = () => {
@@ -329,42 +218,46 @@ export default function SignUp() {
   }
 
   // Validate email format
-  const isValidEmail = (email) => {
+  const isValidEmail = (email: string) => {
     return /\S+@\S+\.\S+/.test(email)
   }
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
 
     // Only process submission if we're on the final step
     if (currentStep !== 4) {
-      return
+      return;
     }
 
-    setError("")
-    setLoading(true)
+    setError("");
+    setLoading(true);
 
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      })
+      });
 
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || "Sign-up failed")
+        const data = await res.json();
+        throw new Error(data.error || "Sign-up failed");
       }
 
       // Move to success step
-      setCurrentStep(5)
-    } catch (err) {
-      setError(err.message)
+      setCurrentStep(5);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unexpected error occurred");
+      }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Render step indicator
   const renderStepIndicator = () => {
@@ -731,12 +624,7 @@ export default function SignUp() {
                   id="acceptTerms"
                   name="acceptTerms"
                   checked={formData.acceptTerms}
-                  onCheckedChange={(checked) => {
-                    setFormData({
-                      ...formData,
-                      acceptTerms: checked,
-                    })
-                  }}
+                  onCheckedChange={handleCheckboxChange}
                   required
                 />
                 <Label
@@ -947,20 +835,6 @@ export default function SignUp() {
         />
       </div>
 
-      {/* Header */}
-      {/* <header className="bg-slate-100/90 backdrop-blur-sm shadow-sm py-4 px-6 border-b border-slate-300 relative z-10">
-        <div className="container mx-auto flex justify-center">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="relative h-8 w-8 overflow-hidden rounded-md bg-gradient-to-r from-cyan-500 to-blue-600">
-              <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">R</div>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
-              HirezApp
-            </span>
-          </Link>
-        </div>
-      </header> */}
-
       {/* Main content */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative z-10">
         <div className="container mx-auto max-w-7xl">
@@ -1020,8 +894,11 @@ export default function SignUp() {
                         </Button>
                       ) : (
                         <Button
-                          type="button"
-                          onClick={handleSubmit}
+                          type="submit"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleSubmit(e as unknown as FormEvent);
+                          }}
                           disabled={loading}
                           className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-lg flex items-center gap-2 shadow-md hover:shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                         >
@@ -1068,61 +945,10 @@ export default function SignUp() {
               {/* Testimonial */}
               <AnimatePresence mode="wait">{currentStep < 5 && renderTestimonial()}</AnimatePresence>
               <AnimatePresence mode="wait">{currentStep < 5 && renderCurrentBenefit()}</AnimatePresence>
-
-              {/* Path to better hiring */}
-              {/* {currentStep < 5 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-5 shadow-lg border border-slate-700"
-                >
-                  <h3 className="text-lg font-bold text-white mb-3">Your Path to Better Hiring</h3>
-                  <div className="space-y-3">
-                    {[
-                      { step: 1, text: "Create your account", icon: <User className="h-4 w-4" /> },
-                      { step: 2, text: "Set up your profile", icon: <UserCircle className="h-4 w-4" /> },
-                      { step: 3, text: "Connect your company", icon: <Building2 className="h-4 w-4" /> },
-                      { step: 4, text: "Define your needs", icon: <Briefcase className="h-4 w-4" /> },
-                      { step: 5, text: "Start finding top talent", icon: <Award className="h-4 w-4" /> },
-                    ].map((item) => (
-                      <div key={item.step} className="flex items-center gap-2">
-                        <div
-                          className={`h-6 w-6 rounded-full flex items-center justify-center ${
-                            currentStep > item.step
-                              ? "bg-green-500 text-white"
-                              : currentStep === item.step
-                                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
-                                : "bg-slate-700 text-slate-400"
-                          }`}
-                        >
-                          {currentStep > item.step ? <CheckCircle className="h-3 w-3" /> : item.icon}
-                        </div>
-                        <div
-                          className={`text-xs ${
-                            currentStep > item.step
-                              ? "text-green-400"
-                              : currentStep === item.step
-                                ? "text-white font-medium"
-                                : "text-slate-400"
-                          }`}
-                        >
-                          {item.text}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )} */}
             </div>
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      {/* <footer className="py-4 px-6 text-center text-slate-600 text-sm bg-slate-200/50 border-t border-slate-300 relative z-10">
-        <p>&copy; {new Date().getFullYear()} HirezApp. All rights reserved.</p>
-      </footer> */}
     </div>
   )
 }

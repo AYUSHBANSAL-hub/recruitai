@@ -4,62 +4,24 @@ import type React from "react";
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import {
-  Briefcase,
-  FileText,
-  Upload,
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-  ArrowRight,
-  Clock,
-  Building,
-  XCircle,
-} from "lucide-react";
+import { Briefcase, FileText, Upload, CheckCircle, AlertCircle, Loader2, ArrowRight, XCircle} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { sendApplicationSubmittedEmail } from "../../../../../lib/email";
 import { PDFDocument } from 'pdf-lib';
-
-interface Form {
-  id: string;
-  title: string;
-  jobDescription: string;
-  fields: {
-    id: string;
-    type: string;
-    label: string;
-    required: boolean;
-    options?: string[];
-    isFixed?: boolean;
-  }[];
-}
+import { JobForm } from "@/types";
 
 export default function ApplyForm() {
   const router = useRouter();
   const params = useParams();
   const [formId, setFormId] = useState<string | string[] | undefined>("");
-  const [form, setForm] = useState<Form | null>(null);
+  const [form, setForm] = useState<JobForm | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState("");
@@ -70,7 +32,6 @@ export default function ApplyForm() {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [success, setSuccess] = useState(false);
   const [submittedStatus, setSubmittedStatus] = useState(false);
-console.log(responses)
   useEffect(() => {
     if (params) {
       setFormId(params.formID);
@@ -78,8 +39,6 @@ console.log(responses)
   }, [params]);
   useEffect(()=>{
     const savedFormId = localStorage.getItem("savedFormId");
-    console.log("savedFormId", savedFormId);
-    console.log("formId", formId);
     if (savedFormId === formId) {
       setSubmittedStatus(true);
     }
@@ -168,8 +127,6 @@ console.log(responses)
         setResumeError("Error validating PDF file");
         return;
       }
-
-      console.log("✅ Resume selected:", file.name);
       setResume(file);
     }
   };
@@ -177,7 +134,6 @@ console.log(responses)
   const uploadFileToS3 = async (file: File): Promise<string> => {
     try {
       setUploadProgress(10);
-      console.log("📤 Requesting pre-signed URL...");
       const res = await fetch("/api/upload-url", {
         method: "POST",
         body: JSON.stringify({ fileType: file.type }),
@@ -188,12 +144,6 @@ console.log(responses)
 
       const { uploadUrl, fileUrl } = await res.json();
       setUploadProgress(30);
-
-      console.log("✅ Pre-signed URL received");
-      console.log("📂 Expected file URL:", fileUrl);
-
-      // Upload file to S3 using PUT request
-      console.log("📤 Uploading file to S3...");
       setUploadProgress(50);
 
       const uploadRes = await fetch(uploadUrl, {
@@ -205,8 +155,6 @@ console.log(responses)
       if (!uploadRes.ok) throw new Error("Failed to upload resume");
 
       setUploadProgress(100);
-      console.log("✅ File uploaded successfully");
-
       return fileUrl;
     } catch (error: any) {
       console.error("❌ Error uploading file:", error);
@@ -229,13 +177,9 @@ console.log(responses)
       }
     });
 
-    console.log("📂 Resume before validation:", resume);
     if (!resume) {
-      console.log("❌ Resume validation failed");
       setResumeError("Please upload your resume");
       isValid = false;
-    } else {
-      console.log("✅ Resume validation passed");
     }
 
     setFormErrors(errors);
@@ -243,8 +187,6 @@ console.log(responses)
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("handle submit called");
-
     setError("");
     setResumeError("");
 
@@ -252,23 +194,16 @@ console.log(responses)
     setTimeout(() => {
       if (!validateForm()) return;
     }, 50);
-
-    console.log("handle submit called 2");
-
     try {
       setSubmitting(true);
 
       if (!formId) throw new Error("Form ID is missing");
-      console.log("📤 Submitting application for Form ID:", formId);
-
       let resumeUrl = "";
       if (resume) {
         resumeUrl = await uploadFileToS3(resume);
       }
-      console.log(form);
       const applicationData = { formId, responses, resumeUrl, formTitle: form?.title };
 
-      console.log("📤 Sending application data to API");
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -283,8 +218,6 @@ console.log(responses)
       localStorage.removeItem("savedFormId"); // Remove any existing form ID from local storage
       localStorage.setItem("savedFormId", Array.isArray(formId) ? formId[0] : formId || ""); // Set the new form ID
       localStorage.setItem("savedFormId", Array.isArray(formId) ? formId[0] : formId || ""); // Ensure formId is a string
-      console.log("✅ Form ID saved to local storage:", formId);
-      console.log("✅ Application submitted successfully");
       setSuccess(true);
     } catch (err: any) {
       console.error("❌ Error during submission:", err);
@@ -405,14 +338,6 @@ console.log(responses)
                   <CardTitle className="text-2xl font-bold text-gray-900">
                     {form.title}
                   </CardTitle>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {/* <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
-                      <Clock className="h-3 w-3 mr-1" /> Full Time
-                    </Badge>
-                    <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
-                      <Building className="h-3 w-3 mr-1" /> Remote
-                    </Badge> */}
-                  </div>
                 </div>
               </div>
             </CardHeader>

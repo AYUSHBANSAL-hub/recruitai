@@ -2,100 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Plus,
-  Users,
-  FileText,
-  Clock,
-  CheckCircle,
-  ChevronRight,
-  Calendar,
-  Briefcase,
-  Search,
-  Clipboard,
-  ArrowUpRight,
-  Copy,
-  CopyCheck,
-  MoreHorizontal,
-  Power,
-  PenLine,
-} from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from "@/components/ui/card";
+import { Plus, Users, FileText, Clock, CheckCircle, ChevronRight, Calendar, Briefcase, Search, Clipboard, ArrowUpRight, Copy, CopyCheck, MoreHorizontal, Power, PenLine,} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter,} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import EditJobDescriptionModal from "@/components/EditJobDescriptionModal";
+import { Application, JobForm } from "@/types";
+import { DashboardStats } from "@/types/admin";
 
-interface Form {
-  id: string;
-  title: string;
-  createdAt: string;
-  active: boolean;
-  applicationsCount?: number;
-  jobDescription?: string;
-}
-
-interface Application {
-  id: string;
-  status: string;
-  formId?: string;
-  userId?: string;
-  createdAt?: string;
-}
-
-interface DashboardStats {
-  totalForms: number;
-  activeForms: number;
-  totalApplications: number;
-  pendingReviews: number;
-  shortlisted: number;
-  rejected: number;
-}
-
-const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 20 },
-};
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [copiedId, setCopiedId] = useState(null);
-  const [forms, setForms] = useState<Form[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [recentApplications, setRecentApplications] = useState<Application[]>(
-    []
-  );
+  const [forms, setForms] = useState<JobForm[]>([]);
+  const [recentApplications, setRecentApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [stats, setStats] = useState<DashboardStats>({
-    totalForms: 0,
-    activeForms: 0,
-    totalApplications: 0,
-    pendingReviews: 0,
-    shortlisted: 0,
-    rejected: 0,
-  });
-  const [selectedJob, setSelectedJob] = useState(null);
+  const [stats, setStats] = useState<DashboardStats>({ totalForms: 0, activeForms: 0, totalApplications: 0, pendingReviews: 0, shortlisted: 0, rejected: 0});
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
 
@@ -115,13 +43,11 @@ export default function AdminDashboard() {
 
         const formsData = await formsRes.json();
         const applicationsData = await applicationsRes.json();
-        console.log(applicationsData);
-
         // Enhance forms with application counts
         const filteredApplications = applicationsData.filter((app: Application) =>
-          formsData.some((form: Form) => form.id === app.formId)
+          formsData.some((form: JobForm) => form.id === app.formId)
         );        
-        const enhancedForms = formsData.map((form: Form) => ({
+        const enhancedForms = formsData.map((form: JobForm) => ({
           ...form,
           applicationsCount: applicationsData.filter(
             (app: Application) => app.formId === form.id
@@ -129,7 +55,6 @@ export default function AdminDashboard() {
         }));
 
         setForms(enhancedForms);
-        setApplications(applicationsData);
 
         // Get 5 most recent applications
         const sortedApplications = [...filteredApplications]
@@ -145,7 +70,7 @@ export default function AdminDashboard() {
         // Calculate stats
         setStats({
           totalForms: formsData.length,
-          activeForms: formsData.filter((form: Form) => form.active).length,
+          activeForms: formsData.filter((form: JobForm) => form.active).length,
           totalApplications: filteredApplications.length,
           pendingReviews: filteredApplications.filter(
             (app: Application) => app.status === "PENDING"
@@ -276,14 +201,6 @@ export default function AdminDashboard() {
               Welcome back! Here's an overview of your recruitment activities
             </p>
           </div>
-
-          {/* <Button
-            onClick={() => router.push("/admin/forms/create")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create New Job Form
-          </Button> */}
         </div>
 
         {/* Stats Overview */}

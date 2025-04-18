@@ -1,79 +1,24 @@
 "use client";
 
 import React from "react";
-
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import {
-  Search,
-  ChevronUp,
-  ChevronDown,
-  Info,
-  FileText,
-  User,
-  Award,
-  AlertTriangle,
-  MessageSquare,
-  Sparkle,
-  RefreshCw,
-  Delete,
-  TrashIcon,
-} from "lucide-react";
+import { useParams } from "next/navigation";
+import { Search, ChevronUp, ChevronDown, Info, FileText, User, Award, AlertTriangle, MessageSquare, Sparkle, RefreshCw, Delete, TrashIcon,} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import CalendarIntegration from "@/components/CalendarIntegration";
-
-interface Application {
-  id: string;
-  userId?: string | null;
-  responses: { [key: string]: string };
-  resumeUrl: string;
-  status: "PENDING" | "REVIEWED" | "SHORTLISTED" | "REJECTED";
-  matchScore?: number | null; // ✅ AI-generated match score (0-100)
-  matchReasoning?: string | null; // ✅ AI's reasoning for the match
-  strengths: string[];
-  weaknesses: string[];
-  parsedResume?: {
-    strengths?: string[]; // ✅ Key strengths identified by AI
-    weaknesses?: string[]; // ✅ Weaknesses or missing skills
-  } | null;
-}
+import { Application } from "@/types";
 
 export default function ApplicationsList() {
-  const router = useRouter();
   const { formId } = useParams();
-
   const [applications, setApplications] = useState<Application[]>([]);
   const [filteredApplications, setFilteredApplications] = useState<
     Application[]
@@ -106,7 +51,6 @@ export default function ApplicationsList() {
         const formData = await formRes.json();
         setForm(formData);
         const data = await applicationsRes.json();
-        console.log(formData);
         setApplications(data);
         setFilteredApplications(data);
       } catch (err: any) {
